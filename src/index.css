@@ -1,25 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Premium Dark Theme Core */
-  --bg-main: #0a0a0c;
-  --bg-secondary: #121216;
-  --bg-tertiary: #1a1a20;
-  
+  /* Premium Light Theme Core */
+  --bg-main: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+
   /* Primary Accents */
-  --accent-cyan: #00f0ff;
-  --accent-blue: #2a68ff;
-  --accent-purple: #8b3dff;
-  
+  --accent-cyan: #0ea5e9;
+  --accent-blue: #3b82f6;
+  --accent-purple: #8b5cf6;
+
   /* Text */
-  --text-primary: #ffffff;
-  --text-secondary: #a1a1aa;
-  --text-muted: #52525b;
-  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+
   /* UI Elements */
-  --border-color: rgba(255, 255, 255, 0.08);
-  --glass-bg: rgba(18, 18, 22, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.05);
+  --border-color: rgba(0, 0, 0, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.2);
 
   /* Status Colors */
   --success: #10b981;
@@ -56,7 +56,7 @@ body {
 }
 
 .glass-card {
-  background: linear-gradient(145deg, rgba(26, 26, 32, 0.8), rgba(18, 18, 22, 0.8));
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
   border: 1px solid var(--border-color);
   border-radius: 16px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -64,8 +64,8 @@ body {
 
 .glass-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 240, 255, 0.1);
-  border-color: rgba(0, 240, 255, 0.3);
+  box-shadow: 0 12px 24px rgba(14, 165, 233, 0.15);
+  border-color: rgba(14, 165, 233, 0.3);
 }
 
 /* Gradients */
@@ -116,7 +116,7 @@ body {
 .btn-outline:hover {
   border-color: var(--accent-cyan);
   color: var(--accent-cyan);
-  background: rgba(0, 240, 255, 0.05);
+  background: rgba(14, 165, 233, 0.05);
 }
 
 /* Forms */
@@ -187,14 +187,37 @@ body {
   justify-content: space-between;
 }
 
-.grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-.grid-cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-.grid-cols-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+.grid-cols-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.grid-cols-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.grid-cols-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
 
 @media (max-width: 1024px) {
-  .grid-cols-3, .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
+
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 640px) {
-  .grid-cols-2, .grid-cols-3, .grid-cols-4 { grid-template-columns: 1fr; }
+
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
 }
