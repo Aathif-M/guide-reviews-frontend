@@ -6,6 +6,8 @@ import axios from 'axios';
 const Home = () => {
     const [apps, setApps] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('All');
     const headerRef = useRef(null);
     const cardsRef = useRef([]);
     const navigate = useNavigate();
@@ -39,6 +41,15 @@ const Home = () => {
         }
     }, [loading, apps]);
 
+    const categories = ['All', ...new Set(apps.map(app => app.category?.name).filter(Boolean))];
+
+    const filteredApps = apps.filter(app => {
+        const matchesSearch = app.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            app.description.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesCategory = selectedCategory === 'All' || app.category?.name === selectedCategory;
+        return matchesSearch && matchesCategory;
+    });
+
     return (
         <div className="container" style={{ padding: '4rem 1.5rem' }}>
             <div ref={headerRef} className="text-center" style={{ marginBottom: '4rem' }}>
@@ -48,7 +59,40 @@ const Home = () => {
                 <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
                     The Trustpilot for elderly-friendly mobile applications. Discover, review, and help improve the digital experience for older adults.
                 </p>
+                {/* <div style={{ marginTop: '2rem' }}>
+                    <button
+                        className="btn btn-primary"
+                        style={{ padding: '0.8rem 2rem', fontSize: '1.1rem', fontWeight: 600 }}
+                        onClick={() => navigate('/submit')}
+                    >
+                        + Add App
+                    </button>
+                </div> */}
             </div>
+
+            {/* Filters Section */}
+            {!loading && apps.length > 0 && (
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '3rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search apps by name or description..."
+                        style={{ maxWidth: '400px', flexGrow: 1 }}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <select
+                        className="form-control"
+                        style={{ maxWidth: '250px' }}
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                    >
+                        {categories.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                    </select>
+                </div>
+            )}
 
             {loading ? (
                 <div className="flex-center">
@@ -56,12 +100,12 @@ const Home = () => {
                 </div>
             ) : (
                 <div className="grid-cols-3">
-                    {apps.length === 0 ? (
+                    {filteredApps.length === 0 ? (
                         <div style={{ gridColumn: '1 / -1', textAlign: 'center', color: 'var(--text-muted)' }}>
-                            No apps approved yet. Check back later!
+                            No apps found matching your criteria.
                         </div>
                     ) : (
-                        apps.map((app, index) => (
+                        filteredApps.map((app, index) => (
                             <div
                                 key={app.id}
                                 className="glass-card"
@@ -72,7 +116,7 @@ const Home = () => {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                         {app.logoUrl && (
-                                            <img src={app.logoUrl} alt={`${app.title} logo`} style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover' }} />
+                                            <img src={app.logoUrl?.startsWith('/uploads') ? `http://localhost:5000${app.logoUrl}` : app.logoUrl} alt={`${app.title} logo`} style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover' }} />
                                         )}
                                         <h3 style={{ fontSize: '1.25rem', fontWeight: 600, maxWidth: '180px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{app.title}</h3>
                                     </div>
@@ -80,12 +124,18 @@ const Home = () => {
                                         <span style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', borderRadius: '4px', background: 'rgba(0, 240, 255, 0.1)', color: 'var(--accent-cyan)' }}>
                                             {app.category?.name || 'Category'}
                                         </span>
-                                        <span style={{ display: 'flex', alignItems: 'center', background: 'var(--warning)', color: '#fff', padding: '0.15rem 0.4rem', borderRadius: '4px', fontWeight: 600, fontSize: '0.85rem' }}>
-                                            <svg style={{ width: '12px', height: '12px', marginRight: '3px' }} fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                            </svg>
-                                            {app.computedRating > 0 ? parseFloat(app.computedRating).toFixed(1) : 'New'}
-                                        </span>
+                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', gap: '2px' }}>
+                                                {[1, 2, 3, 4, 5].map(star => (
+                                                    <svg key={star} style={{ width: '14px', height: '14px', color: star <= Math.round(app.computedRating || 0) ? 'var(--warning)' : 'var(--border-color)', fill: 'currentColor' }} viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                    </svg>
+                                                ))}
+                                            </div>
+                                            <span style={{ fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.85rem', marginLeft: '0.5rem' }}>
+                                                {app.computedRating > 0 ? parseFloat(app.computedRating).toFixed(2) : 'New'}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem', flexGrow: 1 }}>

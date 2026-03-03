@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
 import SubmitApp from './pages/SubmitApp';
+import EditApp from './pages/EditApp';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './context/AuthContext';
 
@@ -33,9 +34,9 @@ const AppContent = () => {
         <nav>
           <ul className="flex-center" style={{ gap: '2rem', listStyle: 'none' }}>
             <li><a href="/" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Home</a></li>
+            <li><a href={user ? "/submit" : "/login"} style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>+ Add App</a></li>
             {user ? (
               <>
-                <li><a href="/submit" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>+ Add App</a></li>
                 {user.role === 'ADMIN' && (
                   <li><a href="/admin" style={{ color: 'var(--accent-blue)', fontWeight: 600, textDecoration: 'none' }}>Admin Dashboard</a></li>
                 )}
@@ -67,6 +68,7 @@ const AppContent = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/submit" element={<ProtectedRoute><SubmitApp /></ProtectedRoute>} />
+          <Route path="/edit-app/:id" element={<ProtectedRoute requireAdmin={true}><EditApp /></ProtectedRoute>} />
           <Route
             path="/admin/*"
             element={

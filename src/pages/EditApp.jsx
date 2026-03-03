@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
-const SubmitApp = () => {
-    // Component State: Form fields
+const EditApp = () => {
+    const { id } = useParams();
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -11,62 +11,61 @@ const SubmitApp = () => {
         playstoreLink: '',
         appstoreLink: ''
     });
-
-    // Component State: Dynamic array for managing attached video tutorials
     const [tutorials, setTutorials] = useState([]);
-
-    // Component State: Image file for the app logo
-    const [logoFile, setLogoFile] = useState(null);
     const [categories, setCategories] = useState([]);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    // Fetch existing categories from the API on component mount
-    // This allows users to select which heuristic category their app submission belongs to
     useEffect(() => {
         const fetchCategories = async () => {
-            try {
-                const res = await axios.get('http://localhost:5000/api/v1/categories');
-                setCategories(res.data);
-            } catch (err) {
-                console.error('Error fetching categories:', err);
+            const res = await axios.get('http://localhost:5000/api/v1/categories');
+            setCategories(res.data);
+        };
+        const fetchAppDetails = async () => {
+            const res = await axios.get(`http://localhost:5000/api/v1/apps/${id}`);
+            const app = res.data;
+            setFormData({
+                title: app.title || '',
+                description: app.description || '',
+                categoryId: app.categoryId || '',
+                playstoreLink: app.playstoreLink || '',
+                appstoreLink: app.appstoreLink || ''
+            });
+
+            if (app.tutorials) {
+                setTutorials(app.tutorials.map(t => ({ id: t.id, title: t.title, url: t.videoUrl, approvalStatus: t.approvalStatus })));
             }
         };
-        fetchCategories();
-    }, []);
 
-    // Handles the submission of the application form to the backend
+        const loadContent = async () => {
+            try {
+                await fetchCategories();
+                await fetchAppDetails();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+        loadContent();
+    }, [id]);
+
     const handleSubmit = async (e) => {
-        e.preventDefault(); // Prevent standard page reload on form submit
+        e.preventDefault();
         setError('');
         setMessage('');
 
         try {
-            // Build FormData mapping since we are sending a multi-part form (includes an image file)
-            const submitData = new FormData();
-            submitData.append('title', formData.title);
-            submitData.append('description', formData.description);
-            submitData.append('categoryId', formData.categoryId);
-            submitData.append('playstoreLink', formData.playstoreLink);
-            submitData.append('appstoreLink', formData.appstoreLink);
+            await axios.put(`http://localhost:5000/api/v1/apps/${id}`, {
+                ...formData,
+                tutorials: tutorials.filter(t => t.title.trim() !== '' && t.url.trim() !== '')
+            }, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
 
-            // Filter out empty tutorials before stringifying the JSON array
-            const validTutorials = tutorials.filter(t => t.title.trim() !== '' && t.url.trim() !== '');
-            submitData.append('tutorials', JSON.stringify(validTutorials));
-
-            if (logoFile) {
-                submitData.append('logo', logoFile);
-            }
-
-            // Assume axios automatically calculates multipart/form-data boundaries when passed FormData
-            await axios.post('http://localhost:5000/api/v1/apps', submitData);
-            setMessage('Application submitted successfully! It is now pending admin review.');
-            setFormData({ title: '', description: '', categoryId: '', playstoreLink: '', appstoreLink: '' });
-            setTutorials([]);
-            setLogoFile(null);
+            setMessage('Application updated successfully!');
+            setTimeout(() => navigate('/dashboard'), 1500);
         } catch (err) {
-            setError(err.response?.data?.error || 'Failed to submit application.');
+            setError(err.response?.data?.error || 'Failed to update application.');
         }
     };
 
@@ -77,9 +76,9 @@ const SubmitApp = () => {
             </button>
 
             <div className="glass-panel" style={{ maxWidth: '800px', margin: '0 auto', padding: '3rem' }}>
-                <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Submit an Application</h1>
+                <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Edit Application</h1>
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-                    Help map the digital world for older adults by submitting an app you find useful or want to be reviewed.
+                    Make core changes to the app's metadata globally.
                 </p>
 
                 {message && <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', borderRadius: '8px', marginBottom: '1.5rem' }}>{message}</div>}
@@ -106,11 +105,6 @@ const SubmitApp = () => {
                         <textarea className="form-control" rows="5" required value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Describe what this app does and why it's useful..." />
                     </div>
 
-                    <div className="form-group">
-                        <label className="form-label">App Logo (Image File)</label>
-                        <input type="file" accept="image/*" className="form-control" onChange={(e) => setLogoFile(e.target.files[0])} style={{ padding: '0.6rem' }} />
-                    </div>
-
                     <div className="grid-cols-2" style={{ gap: '1rem', marginBottom: '1.5rem' }}>
                         <div className="form-group">
                             <label className="form-label">Google Play Store Link</label>
@@ -133,9 +127,6 @@ const SubmitApp = () => {
                                 + Add Tutorial
                             </button>
                         </label>
-                        {tutorials.length === 0 && (
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Attach tutorial videos to help seniors learn to use this app. (Optional)</span>
-                        )}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
                             {tutorials.map((tutorial, index) => (
                                 <div key={index} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
@@ -146,21 +137,21 @@ const SubmitApp = () => {
                                             placeholder="What is this tutorial for? (e.g. How to log in)"
                                             value={tutorial.title}
                                             onChange={(e) => {
-                                                const newTuts = [...tutorials];
-                                                newTuts[index].title = e.target.value;
-                                                setTutorials(newTuts);
+                                                const newTutorials = [...tutorials];
+                                                newTutorials[index].title = e.target.value;
+                                                setTutorials(newTutorials);
                                             }}
                                             required
                                         />
                                         <input
                                             type="url"
                                             className="form-control"
-                                            placeholder="YouTube URL (https://youtube.com/watch?v=...)"
+                                            placeholder="https://www.youtube.com/watch?v=..."
                                             value={tutorial.url}
                                             onChange={(e) => {
-                                                const newTuts = [...tutorials];
-                                                newTuts[index].url = e.target.value;
-                                                setTutorials(newTuts);
+                                                const newTutorials = [...tutorials];
+                                                newTutorials[index].url = e.target.value;
+                                                setTutorials(newTutorials);
                                             }}
                                             required
                                         />
@@ -168,10 +159,11 @@ const SubmitApp = () => {
                                     <button
                                         type="button"
                                         className="btn btn-outline"
-                                        style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }}
+                                        style={{ height: '48px', color: 'var(--danger)', borderColor: 'var(--danger)' }}
                                         onClick={() => {
-                                            const newTuts = tutorials.filter((_, i) => i !== index);
-                                            setTutorials(newTuts);
+                                            const newTutorials = [...tutorials];
+                                            newTutorials.splice(index, 1);
+                                            setTutorials(newTutorials);
                                         }}
                                     >
                                         Remove
@@ -181,11 +173,13 @@ const SubmitApp = () => {
                         </div>
                     </div>
 
-                    <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>Submit for Review</button>
+                    <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}>
+                        Save Changes
+                    </button>
                 </form>
             </div>
         </div>
     );
 };
 
-export default SubmitApp;
+export default EditApp;
