@@ -4,10 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { useToast } from '../context/ToastContext';
+import { IconEye, IconEyeOff } from '@tabler/icons-react';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const { addToast } = useToast();
 
@@ -77,14 +79,37 @@ const Login = () => {
                     </div>
                     <div className="form-group login-anim-item">
                         <label className="form-label">Password</label>
-                        <input
-                            type="password"
-                            className="form-control"
-                            placeholder="••••••••"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
+                        <div style={{ position: 'relative' }}>
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                className="form-control"
+                                placeholder="••••••••"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                style={{ paddingRight: '2.5rem' }}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{
+                                    position: 'absolute',
+                                    right: '10px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: 'var(--text-muted)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: '0'
+                                }}
+                            >
+                                {showPassword ? <IconEyeOff size={20} /> : <IconEye size={20} />}
+                            </button>
+                        </div>
                     </div>
 
                     <button

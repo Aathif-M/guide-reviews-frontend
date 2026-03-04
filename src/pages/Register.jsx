@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { useToast } from '../context/ToastContext';
+import { IconEye, IconEyeOff } from '@tabler/icons-react';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -13,6 +14,8 @@ const Register = () => {
         password: '',
         confirmPassword: ''
     });
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const { addToast } = useToast();
 
@@ -114,26 +117,72 @@ const Register = () => {
 
                     <div className="form-group register-anim-item">
                         <label className="form-label">Password</label>
-                        <input
-                            type="password"
-                            className="form-control"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                        />
+                        <div style={{ position: 'relative' }}>
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                className="form-control"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                                style={{ paddingRight: '2.5rem' }}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{
+                                    position: 'absolute',
+                                    right: '10px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: 'var(--text-muted)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: '0'
+                                }}
+                            >
+                                {showPassword ? <IconEyeOff size={20} /> : <IconEye size={20} />}
+                            </button>
+                        </div>
                     </div>
 
                     <div className="form-group register-anim-item">
                         <label className="form-label">Confirm Password</label>
-                        <input
-                            type="password"
-                            className="form-control"
-                            name="confirmPassword"
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            required
-                        />
+                        <div style={{ position: 'relative' }}>
+                            <input
+                                type={showConfirmPassword ? "text" : "password"}
+                                className="form-control"
+                                name="confirmPassword"
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                required
+                                style={{ paddingRight: '2.5rem' }}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                style={{
+                                    position: 'absolute',
+                                    right: '10px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: 'var(--text-muted)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: '0'
+                                }}
+                            >
+                                {showConfirmPassword ? <IconEyeOff size={20} /> : <IconEye size={20} />}
+                            </button>
+                        </div>
                     </div>
 
                     <button
