@@ -3,12 +3,14 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import gsap from 'gsap';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { IconBrandGooglePlay, IconBrandApple, IconChevronDown, IconChevronUp, IconArrowBigUp, IconArrowBigDown } from '@tabler/icons-react';
 
 const AppDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { addToast } = useToast();
 
     const [app, setApp] = useState(null);
     const [forums, setForums] = useState([]);
@@ -27,7 +29,6 @@ const AppDetails = () => {
     const [tutorialTitle, setTutorialTitle] = useState('');
     const [tutorialUrl, setTutorialUrl] = useState('');
     const [questionAnswers, setQuestionAnswers] = useState({}); // Stores answers as { questionId: rating }
-    const [message, setMessage] = useState({ type: '', text: '' }); // type: 'success' | 'error'
     const [editingReviewId, setEditingReviewId] = useState(null);
     const [openTutorialId, setOpenTutorialId] = useState(null);
     const [showReviewForm, setShowReviewForm] = useState(false);
@@ -97,7 +98,7 @@ const AppDetails = () => {
         // Ensure all category questions are answered
         const categoryQuestions = app.category?.questions || [];
         if (categoryQuestions.length > Object.keys(questionAnswers).length) {
-            setMessage({ type: 'error', text: 'Please answer all category-specific questions before submitting your review.' });
+            addToast('Please answer all category-specific questions before submitting your review.', 'error');
             return;
         }
 
@@ -113,7 +114,7 @@ const AppDetails = () => {
                     content: reviewText,
                     answers: formattedAnswers
                 });
-                setMessage({ type: 'success', text: 'Review updated successfully! It is now pending admin approval.' });
+                addToast('Review updated successfully! It is now pending admin approval.', 'success');
                 setEditingReviewId(null);
             } else {
                 await axios.post(`http://localhost:5000/api/v1/apps/${id}/reviews`, {
@@ -121,13 +122,13 @@ const AppDetails = () => {
                     content: reviewText,
                     answers: formattedAnswers
                 });
-                setMessage({ type: 'success', text: 'Review submitted! It is pending admin approval.' });
+                addToast('Review submitted! It is pending admin approval.', 'success');
             }
 
             // Reload page to fetch updated state
             setTimeout(() => window.location.reload(), 1500);
         } catch (err) {
-            setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to submit review' });
+            addToast(err.response?.data?.error || 'Failed to submit review', 'error');
         }
     };
 
@@ -135,10 +136,10 @@ const AppDetails = () => {
         if (!window.confirm('Are you sure you want to delete your review?')) return;
         try {
             await axios.delete(`http://localhost:5000/api/v1/reviews/${reviewId}`);
-            setMessage({ type: 'success', text: 'Review deleted successfully.' });
+            addToast('Review deleted successfully.', 'success');
             setTimeout(() => window.location.reload(), 1500);
         } catch (err) {
-            setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to delete review' });
+            addToast(err.response?.data?.error || 'Failed to delete review', 'error');
         }
     };
 
@@ -174,13 +175,13 @@ const AppDetails = () => {
             }, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
-            setMessage({ type: 'success', text: 'Forum question posted successfully!' });
+            addToast('Forum question posted successfully!', 'success');
             const newPost = { ...res.data, user, answers: [], _count: { answers: 0 } };
             setForums([newPost, ...forums]);
             setForumTitle('');
             setForumContent('');
         } catch (err) {
-            setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to post to forum' });
+            addToast(err.response?.data?.error || 'Failed to post to forum', 'error');
         }
     };
 
@@ -194,7 +195,7 @@ const AppDetails = () => {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
 
-            setMessage({ type: 'success', text: 'Answer posted successfully!' });
+            addToast('Answer posted successfully!', 'success');
             const newAnswer = { ...res.data, user };
 
             setForums(forums.map(f => {
@@ -206,7 +207,7 @@ const AppDetails = () => {
             setAnswerContent('');
             setActiveReplyPostId(null);
         } catch (err) {
-            setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to post answer' });
+            addToast(err.response?.data?.error || 'Failed to post answer', 'error');
         }
     };
 
@@ -216,10 +217,10 @@ const AppDetails = () => {
             await axios.delete(`http://localhost:5000/api/v1/forums/posts/${postId}`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
-            setMessage({ type: 'success', text: 'Questions deleted successfully.' });
+            addToast('Questions deleted successfully.', 'success');
             setForums(forums.filter(f => f.id !== postId));
         } catch (err) {
-            setMessage({ type: 'error', text: 'Failed to delete post.' });
+            addToast('Failed to delete post.', 'error');
         }
     };
 
@@ -229,7 +230,7 @@ const AppDetails = () => {
             await axios.delete(`http://localhost:5000/api/v1/forums/answers/${answerId}`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
-            setMessage({ type: 'success', text: 'Answer deleted successfully.' });
+            addToast('Answer deleted successfully.', 'success');
             setForums(forums.map(f => {
                 if (f.id === postId) {
                     return {
@@ -241,13 +242,13 @@ const AppDetails = () => {
                 return f;
             }));
         } catch (err) {
-            setMessage({ type: 'error', text: 'Failed to delete answer.' });
+            addToast('Failed to delete answer.', 'error');
         }
     };
 
     const handleVoteAnswer = async (postId, answerId, voteType) => {
         if (!user) {
-            setMessage({ type: 'error', text: 'You must be logged in to vote.' });
+            addToast('You must be logged in to vote.', 'error');
             return;
         }
         try {
@@ -260,15 +261,13 @@ const AppDetails = () => {
             // Re-fetch forums to update vote counts
             const res = await axios.get(`http://localhost:5000/api/v1/apps/${id}/forums`);
             setForums(res.data);
-            setMessage({ type: '', text: '' });
         } catch (err) {
-            setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to vote' });
+            addToast(err.response?.data?.error || 'Failed to vote', 'error');
         }
     };
 
     const handleTutorialSubmit = async (e) => {
         e.preventDefault();
-        setMessage({ type: '', text: '' });
         try {
             await axios.post(`http://localhost:5000/api/v1/apps/${id}/tutorials`, {
                 title: tutorialTitle,
@@ -276,12 +275,12 @@ const AppDetails = () => {
             }, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
-            setMessage({ type: 'success', text: 'Tutorial sent for admin approval.' });
+            addToast('Tutorial sent for admin approval.', 'success');
             setTutorialTitle('');
             setTutorialUrl('');
             setTimeout(() => window.location.reload(), 2000);
         } catch (err) {
-            setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to submit tutorial.' });
+            addToast(err.response?.data?.error || 'Failed to submit tutorial.', 'error');
         }
     };
 
@@ -408,24 +407,20 @@ const AppDetails = () => {
                 <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)' }}>
                     <button
                         style={{ flex: 1, padding: '1.5rem', background: activeTab === 'reviews' ? 'rgba(59, 130, 246, 0.05)' : 'transparent', border: 'none', borderBottom: activeTab === 'reviews' ? '2px solid var(--accent-blue)' : '2px solid transparent', fontSize: '1.2rem', fontWeight: 600, color: activeTab === 'reviews' ? 'var(--accent-blue)' : 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' }}
-                        onClick={() => { setActiveTab('reviews'); setMessage({ type: '', text: '' }); }}
+                        onClick={() => { setActiveTab('reviews'); }}
                     >
                         Community Reviews ({app.reviews?.length || 0})
                     </button>
                     <button
                         style={{ flex: 1, padding: '1.5rem', background: activeTab === 'forum' ? 'rgba(139, 92, 246, 0.05)' : 'transparent', border: 'none', borderBottom: activeTab === 'forum' ? '2px solid var(--accent-purple)' : '2px solid transparent', fontSize: '1.2rem', fontWeight: 600, color: activeTab === 'forum' ? 'var(--accent-purple)' : 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' }}
-                        onClick={() => { setActiveTab('forum'); setMessage({ type: '', text: '' }); }}
+                        onClick={() => { setActiveTab('forum'); }}
                     >
                         Q&A Forum ({forums.length})
                     </button>
                 </div>
 
                 <div style={{ padding: '2rem 3rem' }}>
-                    {message.text && (
-                        <div style={{ padding: '1rem', background: message.type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: message.type === 'success' ? 'var(--success)' : 'var(--danger)', borderRadius: '8px', marginBottom: '1.5rem' }}>
-                            {message.text}
-                        </div>
-                    )}
+                    {/* Floating toast notifications used globally */}
 
                     {/* REVIEWS TAB */}
                     {activeTab === 'reviews' && (
@@ -717,29 +712,35 @@ const AppDetails = () => {
                                                     post.answers.map(answer => (
                                                         <div key={answer.id} style={{ padding: '1rem', background: 'var(--bg-tertiary)', borderRadius: '8px', display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
                                                             {/* Voting Sidebar */}
-                                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.1rem' }}>
-                                                                <button
-                                                                    onClick={() => handleVoteAnswer(post.id, answer.id, 1)}
-                                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-                                                                    onMouseOver={(e) => e.currentTarget.style.color = 'var(--success)'}
-                                                                    onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
-                                                                    title="Upvote"
-                                                                >
-                                                                    <IconArrowBigUp size={24} />
-                                                                </button>
-                                                                <span style={{ fontWeight: 700, fontSize: '1.2rem', color: ((answer.upvotes || 0) - (answer.downvotes || 0)) > 0 ? 'var(--success)' : (((answer.upvotes || 0) - (answer.downvotes || 0)) < 0 ? 'var(--danger)' : 'var(--text-primary)') }}>
-                                                                    {(answer.upvotes || 0) - (answer.downvotes || 0)}
-                                                                </span>
-                                                                <button
-                                                                    onClick={() => handleVoteAnswer(post.id, answer.id, -1)}
-                                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-                                                                    onMouseOver={(e) => e.currentTarget.style.color = 'var(--danger)'}
-                                                                    onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
-                                                                    title="Downvote"
-                                                                >
-                                                                    <IconArrowBigDown size={24} />
-                                                                </button>
-                                                            </div>
+                                                            {(() => {
+                                                                const myVote = user && answer.votes ? answer.votes.find(v => v.userId === user.id)?.voteType : undefined;
+                                                                const netScore = (answer.upvotes || 0) - (answer.downvotes || 0);
+                                                                return (
+                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.1rem' }}>
+                                                                        <button
+                                                                            onClick={() => handleVoteAnswer(post.id, answer.id, 1)}
+                                                                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: myVote === 1 ? 'var(--success)' : 'var(--text-muted)', transition: 'color 0.15s' }}
+                                                                            onMouseOver={(e) => { if (myVote !== 1) e.currentTarget.style.color = 'var(--success)'; }}
+                                                                            onMouseOut={(e) => { if (myVote !== 1) e.currentTarget.style.color = 'var(--text-muted)'; }}
+                                                                            title={myVote === 1 ? 'Remove Upvote' : 'Upvote'}
+                                                                        >
+                                                                            <IconArrowBigUp size={24} fill={myVote === 1 ? 'currentColor' : 'none'} />
+                                                                        </button>
+                                                                        <span style={{ fontWeight: 700, fontSize: '1.2rem', color: netScore > 0 ? 'var(--success)' : (netScore < 0 ? 'var(--danger)' : 'var(--text-primary)') }}>
+                                                                            {netScore}
+                                                                        </span>
+                                                                        <button
+                                                                            onClick={() => handleVoteAnswer(post.id, answer.id, -1)}
+                                                                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: myVote === -1 ? 'var(--danger)' : 'var(--text-muted)', transition: 'color 0.15s' }}
+                                                                            onMouseOver={(e) => { if (myVote !== -1) e.currentTarget.style.color = 'var(--danger)'; }}
+                                                                            onMouseOut={(e) => { if (myVote !== -1) e.currentTarget.style.color = 'var(--text-muted)'; }}
+                                                                            title={myVote === -1 ? 'Remove Downvote' : 'Downvote'}
+                                                                        >
+                                                                            <IconArrowBigDown size={24} fill={myVote === -1 ? 'currentColor' : 'none'} />
+                                                                        </button>
+                                                                    </div>
+                                                                );
+                                                            })()}
                                                             {/* Answer Content */}
                                                             <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                                                 <div>

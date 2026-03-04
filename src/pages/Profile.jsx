@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import gsap from 'gsap';
+import { useToast } from '../context/ToastContext';
 
 const Profile = () => {
     const { user } = useAuth();
-    const [activeTab, setActiveTab] = useState('settings'); // 'settings' | 'activity'
+    const { addToast } = useToast();
+    const [activeTab, setActiveTab] = useState('settings');
     const [formData, setFormData] = useState({
         firstName: user?.firstName || '',
         lastName: user?.lastName || '',
         email: user?.email || '',
     });
-    const [message, setMessage] = useState('');
     const [activities, setActivities] = useState({ reviews: [], apps: [], forumPosts: [] });
     const [loading, setLoading] = useState(true);
 
@@ -34,9 +35,9 @@ const Profile = () => {
         try {
             // API call to update user info
             await axios.put('http://localhost:5000/api/v1/users/me', formData);
-            setMessage('Profile updated successfully!');
+            addToast('Profile updated successfully!', 'success');
         } catch (err) {
-            setMessage('Error updating profile.');
+            addToast('Error updating profile.', 'error');
         }
     };
 
@@ -73,7 +74,6 @@ const Profile = () => {
                 {activeTab === 'settings' && (
                     <div>
                         <h2 style={{ fontSize: '1.75rem', marginBottom: '1.5rem' }}>Personal Information</h2>
-                        {message && <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', borderRadius: '8px', marginBottom: '1.5rem' }}>{message}</div>}
 
                         <form onSubmit={handleUpdate} style={{ maxWidth: '500px' }}>
                             <div className="grid-cols-2" style={{ gap: '1rem', marginBottom: '1rem' }}>

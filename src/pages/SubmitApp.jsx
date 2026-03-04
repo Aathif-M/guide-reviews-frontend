@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useToast } from '../context/ToastContext';
 
 const SubmitApp = () => {
-    // Component State: Form fields
+    const { addToast } = useToast();
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -11,19 +12,11 @@ const SubmitApp = () => {
         playstoreLink: '',
         appstoreLink: ''
     });
-
-    // Component State: Dynamic array for managing attached video tutorials
     const [tutorials, setTutorials] = useState([]);
-
-    // Component State: Image file for the app logo
     const [logoFile, setLogoFile] = useState(null);
     const [categories, setCategories] = useState([]);
-    const [message, setMessage] = useState('');
-    const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    // Fetch existing categories from the API on component mount
-    // This allows users to select which heuristic category their app submission belongs to
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -36,14 +29,9 @@ const SubmitApp = () => {
         fetchCategories();
     }, []);
 
-    // Handles the submission of the application form to the backend
     const handleSubmit = async (e) => {
-        e.preventDefault(); // Prevent standard page reload on form submit
-        setError('');
-        setMessage('');
-
+        e.preventDefault();
         try {
-            // Build FormData mapping since we are sending a multi-part form (includes an image file)
             const submitData = new FormData();
             submitData.append('title', formData.title);
             submitData.append('description', formData.description);
@@ -51,22 +39,18 @@ const SubmitApp = () => {
             submitData.append('playstoreLink', formData.playstoreLink);
             submitData.append('appstoreLink', formData.appstoreLink);
 
-            // Filter out empty tutorials before stringifying the JSON array
             const validTutorials = tutorials.filter(t => t.title.trim() !== '' && t.url.trim() !== '');
             submitData.append('tutorials', JSON.stringify(validTutorials));
 
-            if (logoFile) {
-                submitData.append('logo', logoFile);
-            }
+            if (logoFile) submitData.append('logo', logoFile);
 
-            // Assume axios automatically calculates multipart/form-data boundaries when passed FormData
             await axios.post('http://localhost:5000/api/v1/apps', submitData);
-            setMessage('Application and optionally attached tutorials submitted successfully! Sent for admin approval.');
+            addToast('Application submitted successfully! Sent for admin approval.', 'success');
             setFormData({ title: '', description: '', categoryId: '', playstoreLink: '', appstoreLink: '' });
             setTutorials([]);
             setLogoFile(null);
         } catch (err) {
-            setError(err.response?.data?.error || 'Failed to submit application.');
+            addToast(err.response?.data?.error || 'Failed to submit application.', 'error');
         }
     };
 
@@ -81,9 +65,6 @@ const SubmitApp = () => {
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
                     Help map the digital world for older adults by submitting an app you find useful or want to be reviewed.
                 </p>
-
-                {message && <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', borderRadius: '8px', marginBottom: '1.5rem' }}>{message}</div>}
-                {error && <div style={{ padding: '1rem', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', borderRadius: '8px', marginBottom: '1.5rem' }}>{error}</div>}
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
@@ -125,11 +106,7 @@ const SubmitApp = () => {
                     <div className="form-group">
                         <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span>YouTube Tutorials</span>
-                            <button
-                                type="button"
-                                className="btn btn-sm btn-outline"
-                                onClick={() => setTutorials([...tutorials, { title: '', url: '' }])}
-                            >
+                            <button type="button" className="btn btn-sm btn-outline" onClick={() => setTutorials([...tutorials, { title: '', url: '' }])}>
                                 + Add Tutorial
                             </button>
                         </label>
@@ -140,42 +117,10 @@ const SubmitApp = () => {
                             {tutorials.map((tutorial, index) => (
                                 <div key={index} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
                                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            placeholder="What is this tutorial for? (e.g. How to log in)"
-                                            value={tutorial.title}
-                                            onChange={(e) => {
-                                                const newTuts = [...tutorials];
-                                                newTuts[index].title = e.target.value;
-                                                setTutorials(newTuts);
-                                            }}
-                                            required
-                                        />
-                                        <input
-                                            type="url"
-                                            className="form-control"
-                                            placeholder="YouTube URL (https://youtube.com/watch?v=...)"
-                                            value={tutorial.url}
-                                            onChange={(e) => {
-                                                const newTuts = [...tutorials];
-                                                newTuts[index].url = e.target.value;
-                                                setTutorials(newTuts);
-                                            }}
-                                            required
-                                        />
+                                        <input type="text" className="form-control" placeholder="What is this tutorial for? (e.g. How to log in)" value={tutorial.title} onChange={(e) => { const n = [...tutorials]; n[index].title = e.target.value; setTutorials(n); }} required />
+                                        <input type="url" className="form-control" placeholder="YouTube URL (https://youtube.com/watch?v=...)" value={tutorial.url} onChange={(e) => { const n = [...tutorials]; n[index].url = e.target.value; setTutorials(n); }} required />
                                     </div>
-                                    <button
-                                        type="button"
-                                        className="btn btn-outline"
-                                        style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }}
-                                        onClick={() => {
-                                            const newTuts = tutorials.filter((_, i) => i !== index);
-                                            setTutorials(newTuts);
-                                        }}
-                                    >
-                                        Remove
-                                    </button>
+                                    <button type="button" className="btn btn-outline" style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => setTutorials(tutorials.filter((_, i) => i !== index))}>Remove</button>
                                 </div>
                             ))}
                         </div>

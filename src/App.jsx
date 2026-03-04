@@ -14,6 +14,7 @@ import SubmitApp from './pages/SubmitApp';
 import EditApp from './pages/EditApp';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
 
 const NotFound = () => <div className="container flex-center" style={{ minHeight: '80vh' }}><h1>404 Not Found</h1></div>;
 
@@ -92,7 +93,9 @@ const AppContent = () => {
 function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
     </BrowserRouter>
   );
 }

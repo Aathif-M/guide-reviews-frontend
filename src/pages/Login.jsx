@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import gsap from 'gsap';
+import { useToast } from '../context/ToastContext';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const { addToast } = useToast();
 
     const { login } = useAuth();
     const navigate = useNavigate();
@@ -22,7 +23,6 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
         setLoading(true);
 
         try {
@@ -35,7 +35,7 @@ const Login = () => {
                 navigate('/');
             }
         } catch (err) {
-            setError(typeof err === 'string' ? err : 'Login failed. Please check your credentials.');
+            addToast(typeof err === 'string' ? err : 'Login failed. Please check your credentials.', 'error');
             // Shake animation on error
             gsap.fromTo('.login-card',
                 { x: -10 },
@@ -52,11 +52,7 @@ const Login = () => {
                 <h2 className="text-gradient" style={{ fontSize: '2rem', marginBottom: '0.5rem', textAlign: 'center' }}>Welcome Back</h2>
                 <p style={{ color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '2rem' }}>Sign in to continue to G.U.I.D.E.</p>
 
-                {error && (
-                    <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-                        {error}
-                    </div>
-                )}
+                <p style={{ color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '2rem' }}>Sign in to continue to G.U.I.D.E.</p>
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">

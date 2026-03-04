@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import gsap from 'gsap';
+import { useToast } from '../context/ToastContext';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -11,8 +12,8 @@ const Register = () => {
         password: '',
         confirmPassword: ''
     });
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const { addToast } = useToast();
 
     const { register } = useAuth();
     const navigate = useNavigate();
@@ -30,10 +31,9 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
 
         if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
+            addToast('Passwords do not match', 'error');
             return;
         }
 
@@ -49,7 +49,7 @@ const Register = () => {
             // On success, redirect to home
             navigate('/');
         } catch (err) {
-            setError(typeof err === 'string' ? err : 'Registration failed. Please try again.');
+            addToast(typeof err === 'string' ? err : 'Registration failed. Please try again.', 'error');
             gsap.fromTo('.register-card',
                 { x: -10 },
                 { x: 10, yoyo: true, repeat: 3, duration: 0.1, clearProps: 'x' }
@@ -65,11 +65,7 @@ const Register = () => {
                 <h2 className="text-gradient" style={{ fontSize: '2rem', marginBottom: '0.5rem', textAlign: 'center' }}>Create Account</h2>
                 <p style={{ color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '2rem' }}>Join the G.U.I.D.E. community</p>
 
-                {error && (
-                    <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-                        {error}
-                    </div>
-                )}
+                <p style={{ color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '2rem' }}>Join the G.U.I.D.E. community</p>
 
                 <form onSubmit={handleSubmit}>
                     <div className="grid-cols-2" style={{ gap: '1rem', marginBottom: '1.5rem' }}>
