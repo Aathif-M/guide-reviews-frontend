@@ -514,28 +514,40 @@ const AdminDashboard = () => {
                                     </select>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    {users.filter(u => userFilter === 'ALL' || u.role === userFilter).map(u => (
-                                        <div key={u.id} className="glass-card" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <div>
-                                                <strong style={{ fontSize: '1.1rem', color: u.isSuspended ? 'var(--danger)' : 'inherit', textDecoration: u.isSuspended ? 'line-through' : 'none' }}>{u.firstName} {u.lastName}</strong>
-                                                <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                                                    {u.email} {u.isSuspended && <span style={{ color: 'var(--danger)', marginLeft: '10px', fontWeight: 600 }}>[Suspended]</span>}
+                                    {users.filter(u => userFilter === 'ALL' || u.role === userFilter).map(u => {
+                                        let daysRemainingMsg = null;
+                                        if (u.isSuspended && u.suspendedAt) {
+                                            const suspendedDate = new Date(u.suspendedAt);
+                                            const now = new Date();
+                                            const diffMs = now - suspendedDate;
+                                            const daysPassed = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                                            const daysRemaining = Math.max(0, 30 - daysPassed);
+                                            daysRemainingMsg = `[Account deletes in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}]`;
+                                        }
+
+                                        return (
+                                            <div key={u.id} className="glass-card" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div>
+                                                    <strong style={{ fontSize: '1.1rem', color: u.isSuspended ? 'var(--danger)' : 'inherit', textDecoration: u.isSuspended ? 'line-through' : 'none' }}>{u.firstName} {u.lastName}</strong>
+                                                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                                                        {u.email} {u.isSuspended && <span style={{ color: 'var(--danger)', marginLeft: '10px', fontWeight: 600 }}>[Suspended] {daysRemainingMsg && <span style={{ fontSize: '0.8rem', opacity: 0.9 }}> {daysRemainingMsg}</span>}</span>}
+                                                    </div>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                                    <span style={{ padding: '0.3rem 0.8rem', background: 'var(--bg-tertiary)', borderRadius: '4px', fontSize: '0.8rem' }}>{u.role}</span>
+                                                    {u.role !== 'ADMIN' && (
+                                                        <button
+                                                            className="btn btn-outline"
+                                                            style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem', color: u.isSuspended ? 'var(--success)' : 'var(--danger)', borderColor: u.isSuspended ? 'var(--success)' : 'var(--danger)' }}
+                                                            onClick={() => handleSuspendUser(u.id, u.isSuspended)}
+                                                        >
+                                                            {u.isSuspended ? 'Unsuspend' : 'Suspend'}
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
-                                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                                <span style={{ padding: '0.3rem 0.8rem', background: 'var(--bg-tertiary)', borderRadius: '4px', fontSize: '0.8rem' }}>{u.role}</span>
-                                                {u.role !== 'ADMIN' && (
-                                                    <button
-                                                        className="btn btn-outline"
-                                                        style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem', color: u.isSuspended ? 'var(--success)' : 'var(--danger)', borderColor: u.isSuspended ? 'var(--success)' : 'var(--danger)' }}
-                                                        onClick={() => handleSuspendUser(u.id, u.isSuspended)}
-                                                    >
-                                                        {u.isSuspended ? 'Unsuspend' : 'Suspend'}
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                     {users.filter(u => userFilter === 'ALL' || u.role === userFilter).length === 0 && (
                                         <p style={{ color: 'var(--text-muted)' }}>No users found.</p>
                                     )}
