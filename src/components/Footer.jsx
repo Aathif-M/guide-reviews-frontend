@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { IconBrandFacebook, IconBrandTwitter, IconBrandInstagram, IconBrandGithub } from '@tabler/icons-react';
 
-const Footer = () => {
+const Footer = ({ theme }) => {
     return (
         <footer style={{
             marginTop: 'auto',
@@ -15,7 +15,10 @@ const Footer = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '3rem', marginBottom: '3rem' }}>
                     {/* Brand Section */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <h3 className="text-gradient" style={{ fontSize: '1.5rem', margin: 0 }}>G.U.I.D.E.</h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <img src={theme === 'dark' ? '/assets/logo-dark.png' : '/assets/logo-light.png'} alt="G.U.I.D.E. Logo" style={{ height: '32px', objectFit: 'contain' }} />
+                            <h3 className="text-gradient" style={{ fontSize: '1.5rem', margin: 0 }}>G.U.I.D.E.</h3>
+                        </div>
                         <p style={{ fontSize: '0.9rem', lineHeight: '1.5', opacity: 0.8 }}>
                             Geriatric Usability Index & Digital Evaluation platform. Empowering the elderly through accessible technology analysis.
                         </p>

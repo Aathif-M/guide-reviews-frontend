@@ -40,8 +40,15 @@ const AppContent = () => {
         </div>
       )}
       <header className={`glass-panel flex-between ${user?.role === 'ADMIN' ? 'admin-header' : ''}`} style={{ padding: '1rem 2rem', margin: '1rem', position: 'sticky', top: '1rem', zIndex: 100, borderTop: user?.role === 'ADMIN' ? '2px solid var(--accent-blue)' : undefined }}>
-        <div className="logo text-gradient" style={{ fontSize: '1.5rem', fontWeight: 700 }}>
-          G.U.I.D.E.
+        <div className="logo" style={{ display: 'flex', alignItems: 'center' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', gap: '0.5rem' }}>
+            <img
+              src={theme === 'dark' ? '/assets/logo-dark.png' : '/assets/logo-light.png'}
+              alt="G.U.I.D.E. Logo"
+              style={{ height: '40px', objectFit: 'contain' }}
+            />
+            <span className="text-gradient" style={{ fontSize: '1.5rem', fontWeight: 700 }}>G.U.I.D.E.</span>
+          </Link>
         </div>
         <nav>
           <ul className="flex-center" style={{ gap: '2rem', listStyle: 'none' }}>
@@ -108,7 +115,7 @@ const AppContent = () => {
         </Routes>
       </main>
 
-      <Footer />
+      <Footer theme={theme} />
     </div >
   );
 };
