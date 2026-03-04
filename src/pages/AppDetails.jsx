@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import gsap from 'gsap';
 import { useAuth } from '../context/AuthContext';
-import { IconBrandGooglePlay, IconBrandApple, IconChevronDown, IconChevronUp } from '@tabler/icons-react';
+import { IconBrandGooglePlay, IconBrandApple, IconChevronDown, IconChevronUp, IconArrowBigUp, IconArrowBigDown } from '@tabler/icons-react';
 
 const AppDetails = () => {
     const { id } = useParams();
@@ -242,6 +242,27 @@ const AppDetails = () => {
             }));
         } catch (err) {
             setMessage({ type: 'error', text: 'Failed to delete answer.' });
+        }
+    };
+
+    const handleVoteAnswer = async (postId, answerId, voteType) => {
+        if (!user) {
+            setMessage({ type: 'error', text: 'You must be logged in to vote.' });
+            return;
+        }
+        try {
+            await axios.post(`http://localhost:5000/api/v1/forums/answers/${answerId}/vote`, {
+                vote: voteType
+            }, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+
+            // Re-fetch forums to update vote counts
+            const res = await axios.get(`http://localhost:5000/api/v1/apps/${id}/forums`);
+            setForums(res.data);
+            setMessage({ type: '', text: '' });
+        } catch (err) {
+            setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to vote' });
         }
     };
 
@@ -694,16 +715,43 @@ const AppDetails = () => {
                                             <div style={{ marginLeft: '1rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
                                                 {post.answers && post.answers.length > 0 ? (
                                                     post.answers.map(answer => (
-                                                        <div key={answer.id} style={{ padding: '1rem', background: 'var(--bg-tertiary)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                            <div>
-                                                                <p style={{ color: 'var(--text-primary)', marginBottom: '0.5rem' }}>{answer.content}</p>
-                                                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                                                    Answered by <span style={{ fontWeight: 600 }}>{answer.user?.firstName} {answer.user?.lastName}</span> {answer.user?.role === 'ADMIN' && <span style={{ color: 'var(--warning)', fontSize: '0.7rem', padding: '0.1rem 0.3rem', border: '1px solid var(--warning)', borderRadius: '4px', marginLeft: '4px' }}>ADMIN</span>}
-                                                                </div>
+                                                        <div key={answer.id} style={{ padding: '1rem', background: 'var(--bg-tertiary)', borderRadius: '8px', display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+                                                            {/* Voting Sidebar */}
+                                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.1rem' }}>
+                                                                <button
+                                                                    onClick={() => handleVoteAnswer(post.id, answer.id, 1)}
+                                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+                                                                    onMouseOver={(e) => e.currentTarget.style.color = 'var(--success)'}
+                                                                    onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
+                                                                    title="Upvote"
+                                                                >
+                                                                    <IconArrowBigUp size={24} />
+                                                                </button>
+                                                                <span style={{ fontWeight: 700, fontSize: '1.2rem', color: ((answer.upvotes || 0) - (answer.downvotes || 0)) > 0 ? 'var(--success)' : (((answer.upvotes || 0) - (answer.downvotes || 0)) < 0 ? 'var(--danger)' : 'var(--text-primary)') }}>
+                                                                    {(answer.upvotes || 0) - (answer.downvotes || 0)}
+                                                                </span>
+                                                                <button
+                                                                    onClick={() => handleVoteAnswer(post.id, answer.id, -1)}
+                                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+                                                                    onMouseOver={(e) => e.currentTarget.style.color = 'var(--danger)'}
+                                                                    onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
+                                                                    title="Downvote"
+                                                                >
+                                                                    <IconArrowBigDown size={24} />
+                                                                </button>
                                                             </div>
-                                                            {user?.role === 'ADMIN' && (
-                                                                <button className="btn btn-sm btn-outline" style={{ color: 'var(--danger)', borderColor: 'var(--danger)', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => handleDeleteAnswer(post.id, answer.id)}>Delete Answer</button>
-                                                            )}
+                                                            {/* Answer Content */}
+                                                            <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                                <div>
+                                                                    <p style={{ color: 'var(--text-primary)', marginBottom: '0.5rem', fontSize: '1.05rem', lineHeight: '1.5' }}>{answer.content}</p>
+                                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                                                        Answered by <span style={{ fontWeight: 600 }}>{answer.user?.firstName} {answer.user?.lastName}</span> {answer.user?.role === 'ADMIN' && <span style={{ color: 'var(--warning)', fontSize: '0.7rem', padding: '0.1rem 0.3rem', border: '1px solid var(--warning)', borderRadius: '4px', marginLeft: '4px' }}>ADMIN</span>}
+                                                                    </div>
+                                                                </div>
+                                                                {user?.role === 'ADMIN' && (
+                                                                    <button className="btn btn-sm btn-outline" style={{ color: 'var(--danger)', borderColor: 'var(--danger)', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => handleDeleteAnswer(post.id, answer.id)}>Delete Answer</button>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     ))
                                                 ) : (

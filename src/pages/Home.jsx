@@ -2,6 +2,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import axios from 'axios';
+import { IconHeart, IconDeviceGamepad2, IconBriefcase, IconBook, IconCamera, IconBuildingBank, IconVideo } from '@tabler/icons-react';
+
+const IconMap = {
+    IconHeart,
+    IconDeviceGamepad2,
+    IconBriefcase,
+    IconBook,
+    IconCamera,
+    IconBuildingBank,
+    IconVideo
+};
 
 const Home = () => {
     const [apps, setApps] = useState([]);
@@ -121,7 +132,8 @@ const Home = () => {
                                         <h3 style={{ fontSize: '1.25rem', fontWeight: 600, maxWidth: '180px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{app.title}</h3>
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.4rem' }}>
-                                        <span style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', borderRadius: '4px', background: 'rgba(0, 240, 255, 0.1)', color: 'var(--accent-cyan)' }}>
+                                        <span style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', borderRadius: '4px', background: 'rgba(0, 240, 255, 0.1)', color: 'var(--accent-cyan)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            {app.category?.iconName && IconMap[app.category.iconName] && React.createElement(IconMap[app.category.iconName], { size: 14 })}
                                             {app.category?.name || 'Category'}
                                         </span>
                                         <div style={{ display: 'flex', alignItems: 'center' }}>

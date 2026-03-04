@@ -2,6 +2,17 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { IconHeart, IconDeviceGamepad2, IconBriefcase, IconBook, IconCamera, IconBuildingBank, IconVideo } from '@tabler/icons-react';
+
+const IconMap = {
+    IconHeart,
+    IconDeviceGamepad2,
+    IconBriefcase,
+    IconBook,
+    IconCamera,
+    IconBuildingBank,
+    IconVideo
+};
 
 const AdminDashboard = () => {
     // --- State Management ---
@@ -13,25 +24,27 @@ const AdminDashboard = () => {
     const [users, setUsers] = useState([]);
     const [categories, setCategories] = useState([]);
     const [reviews, setReviews] = useState([]);
-    const [feedback, setFeedback] = useState([]);
     const [tutorials, setTutorials] = useState([]);
 
     // Category Management Local States
     const [editingCategory, setEditingCategory] = useState(null);
-    const [categoryForm, setCategoryForm] = useState({ name: '', description: '', questions: [] });
+    const [categoryForm, setCategoryForm] = useState({ name: '', description: '', iconName: '', questions: [] });
     const [deletedQuestions, setDeletedQuestions] = useState([]);
+    const [viewingActivityUser, setViewingActivityUser] = useState(null);
+    const [userActivity, setUserActivity] = useState(null);
 
     // UI Feedback States
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('apps'); // Switch between 'apps' | 'users' | 'categories' | 'reviews' | 'feedback' | 'tutorials'
+    const [activeTab, setActiveTab] = useState('apps'); // Switch between 'apps' | 'users' | 'categories' | 'reviews' | 'tutorials'
     const [message, setMessage] = useState({ type: '', text: '' }); // 'success' or 'error' notifications
 
     // View Filters for Tabs
     const [appFilter, setAppFilter] = useState('ALL');
     const [tutorialFilter, setTutorialFilter] = useState('PENDING');
+    const [tutorialAppFilter, setTutorialAppFilter] = useState('ALL');
     const [reviewFilter, setReviewFilter] = useState('PENDING');
-    const [feedbackFilter, setFeedbackFilter] = useState('PENDING');
     const [userFilter, setUserFilter] = useState('ALL');
+    const [userStatusFilter, setUserStatusFilter] = useState('ALL');
 
     const navigate = useNavigate();
 
@@ -67,20 +80,12 @@ const AdminDashboard = () => {
         } catch (err) { console.error('Error fetching reviews:', err); }
     };
 
-    const fetchFeedback = async () => {
-        try {
-            const res = await axios.get('http://localhost:5000/api/v1/feedback');
-            setFeedback(res.data);
-        } catch (err) { console.error('Error fetching feedback:', err); }
-    };
-
     const fetchAllData = async () => {
         setLoading(true);
         await fetchApps();
         await fetchUsers();
         await fetchCategories();
         await fetchReviews();
-        await fetchFeedback();
         // We derive pending tutorials from apps object
         setLoading(false);
     };
@@ -102,7 +107,6 @@ const AdminDashboard = () => {
                 case 'users': await fetchUsers(); break;
                 case 'categories': await fetchCategories(); break;
                 case 'reviews': await fetchReviews(); break;
-                case 'feedback': await fetchFeedback(); break;
                 case 'tutorials': await fetchTutorials(); break;
                 default: break;
             }
@@ -120,7 +124,7 @@ const AdminDashboard = () => {
         }
 
         const fetchAll = async () => {
-            await Promise.all([fetchApps(), fetchUsers(), fetchCategories(), fetchReviews(), fetchFeedback(), fetchTutorials()]);
+            await Promise.all([fetchApps(), fetchUsers(), fetchCategories(), fetchReviews(), fetchTutorials()]);
             setLoading(false);
         };
         fetchAll();
@@ -132,7 +136,7 @@ const AdminDashboard = () => {
         apps.forEach(app => {
             if (app.tutorials) {
                 app.tutorials.forEach(t => {
-                    list.push({ ...t, appTitle: app.title });
+                    list.push({ ...t, appTitle: app.title, appLogoUrl: app.logoUrl });
                 });
             }
         });
@@ -150,7 +154,7 @@ const AdminDashboard = () => {
      * @param {string} status - The new approval status ('APPROVED' | 'REJECTED').
      */
     const handleApproveReject = async (type, id, status) => {
-        // type: 'apps' | 'reviews' | 'feedback' | 'tutorials'
+        // type: 'apps' | 'reviews' | 'tutorials'
         try {
 
             if (type === 'tutorials') {
@@ -163,7 +167,6 @@ const AdminDashboard = () => {
 
             if (type === 'apps' || type === 'tutorials') await fetchApps();
             if (type === 'reviews') await fetchReviews();
-            if (type === 'feedback') await fetchFeedback();
         } catch (err) {
             setMessage({ type: 'error', text: 'Error updating status' });
         }
@@ -174,10 +177,10 @@ const AdminDashboard = () => {
         try {
             let catId = null;
             if (editingCategory) {
-                await axios.put(`http://localhost:5000/api/v1/categories/${editingCategory.id}`, { name: categoryForm.name, description: categoryForm.description });
+                await axios.put(`http://localhost:5000/api/v1/categories/${editingCategory.id}`, { name: categoryForm.name, description: categoryForm.description, iconName: categoryForm.iconName });
                 catId = editingCategory.id;
             } else {
-                const res = await axios.post('http://localhost:5000/api/v1/categories', { name: categoryForm.name, description: categoryForm.description });
+                const res = await axios.post('http://localhost:5000/api/v1/categories', { name: categoryForm.name, description: categoryForm.description, iconName: categoryForm.iconName });
                 catId = res.data.id;
             }
 
@@ -198,7 +201,7 @@ const AdminDashboard = () => {
 
             setMessage({ type: 'success', text: editingCategory ? 'Category updated successfully' : 'Category created successfully' });
             setEditingCategory(null);
-            setCategoryForm({ name: '', description: '', questions: [] });
+            setCategoryForm({ name: '', description: '', iconName: '', questions: [] });
             setDeletedQuestions([]);
             fetchCategories();
         } catch (err) {
@@ -243,6 +246,21 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleViewActivity = async (userId) => {
+        try {
+            setViewingActivityUser(userId);
+            setUserActivity(null);
+            document.getElementById('userActivityModal').showModal();
+            const res = await axios.get(`http://localhost:5000/api/v1/users/${userId}/activities`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            setUserActivity(res.data);
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Failed to fetch user activity' });
+            document.getElementById('userActivityModal').close();
+        }
+    };
+
     return (
         <div className="container" style={{ padding: '2rem 1.5rem', display: 'flex', gap: '2rem', minHeight: '80vh' }}>
 
@@ -262,13 +280,6 @@ const AdminDashboard = () => {
                     style={{ width: '100%', justifyContent: 'flex-start', padding: '0.75rem 1rem' }}
                 >
                     Moderate Reviews
-                </button>
-                <button
-                    className={`btn ${activeTab === 'feedback' ? 'btn-primary' : 'btn-outline'}`}
-                    onClick={() => { setActiveTab('feedback'); setMessage({ type: '', text: '' }); }}
-                    style={{ width: '100%', justifyContent: 'flex-start', padding: '0.75rem 1rem' }}
-                >
-                    User Feedback
                 </button>
                 <button
                     className={`btn ${activeTab === 'users' ? 'btn-primary' : 'btn-outline'}`}
@@ -374,19 +385,31 @@ const AdminDashboard = () => {
                             <div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                                     <h2 style={{ fontSize: '2rem' }}>Tutorial Submissions</h2>
-                                    <select className="form-control" style={{ width: 'auto', padding: '0.4rem 2.5rem 0.4rem 1rem' }} value={tutorialFilter} onChange={e => setTutorialFilter(e.target.value)}>
-                                        <option value="ALL">All</option>
-                                        <option value="PENDING">Pending</option>
-                                        <option value="APPROVED">Approved</option>
-                                        <option value="REJECTED">Rejected</option>
-                                    </select>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <select className="form-control" style={{ width: 'auto', padding: '0.4rem 2.5rem 0.4rem 1rem' }} value={tutorialAppFilter} onChange={e => setTutorialAppFilter(e.target.value)}>
+                                            <option value="ALL">All Apps</option>
+                                            {[...new Set(deriveTutorials().map(t => t.appTitle))].map(title => (
+                                                <option key={title} value={title}>{title}</option>
+                                            ))}
+                                        </select>
+                                        <select className="form-control" style={{ width: 'auto', padding: '0.4rem 2.5rem 0.4rem 1rem' }} value={tutorialFilter} onChange={e => setTutorialFilter(e.target.value)}>
+                                            <option value="ALL">All</option>
+                                            <option value="PENDING">Pending</option>
+                                            <option value="APPROVED">Approved</option>
+                                            <option value="REJECTED">Rejected</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    {deriveTutorials().filter(t => tutorialFilter === 'ALL' || t.approvalStatus === tutorialFilter).map(t => (
+                                    {deriveTutorials().filter(t => tutorialFilter === 'ALL' || t.approvalStatus === tutorialFilter).filter(t => tutorialAppFilter === 'ALL' || t.appTitle === tutorialAppFilter).map(t => (
                                         <div key={t.id} className="glass-card" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <div>
                                                 <strong style={{ fontSize: '1.1rem', display: 'block' }}>{t.title}</strong>
-                                                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Target App: {t.appTitle}</span>
+                                                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
+                                                    Target App:
+                                                    {t.appLogoUrl && <img src={t.appLogoUrl.startsWith('/uploads') ? `http://localhost:5000${t.appLogoUrl}` : t.appLogoUrl} alt={`${t.appTitle} logo`} style={{ width: '16px', height: '16px', borderRadius: '4px', objectFit: 'cover' }} />}
+                                                    {t.appTitle}
+                                                </span>
                                             </div>
                                             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                                 <a href={t.videoUrl} target="_blank" rel="noreferrer" className="btn btn-outline" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem' }}>View Link</a>
@@ -395,7 +418,7 @@ const AdminDashboard = () => {
                                             </div>
                                         </div>
                                     ))}
-                                    {deriveTutorials().filter(t => tutorialFilter === 'ALL' || t.approvalStatus === tutorialFilter).length === 0 && <p style={{ color: 'var(--text-muted)' }}>No tutorials found.</p>}
+                                    {deriveTutorials().filter(t => tutorialFilter === 'ALL' || t.approvalStatus === tutorialFilter).filter(t => tutorialAppFilter === 'ALL' || t.appTitle === tutorialAppFilter).length === 0 && <p style={{ color: 'var(--text-muted)' }}>No tutorials found.</p>}
                                 </div>
                             </div>
                         )}
@@ -415,7 +438,10 @@ const AdminDashboard = () => {
                                     {reviews.filter(rev => reviewFilter === 'ALL' || rev.approvalStatus === reviewFilter).map(rev => (
                                         <div key={rev.id} className="glass-card" style={{ padding: '1.5rem' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                                <strong>{rev.app?.title}</strong>
+                                                <strong style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    {rev.app?.logoUrl && <img src={rev.app.logoUrl.startsWith('/uploads') ? `http://localhost:5000${rev.app.logoUrl}` : rev.app.logoUrl} alt={`${rev.app?.title} logo`} style={{ width: '24px', height: '24px', borderRadius: '4px', objectFit: 'cover' }} />}
+                                                    {rev.app?.title}
+                                                </strong>
                                                 <span>
                                                     <span style={{
                                                         color: rev.approvalStatus === 'APPROVED' ? 'var(--success)' : (rev.approvalStatus === 'REJECTED' ? 'var(--danger)' : 'var(--warning)'),
@@ -468,53 +494,57 @@ const AdminDashboard = () => {
                             </div>
                         )}
 
-                        {activeTab === 'feedback' && (
-                            <div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                                    <h2 style={{ fontSize: '2rem' }}>System Feedback</h2>
-                                    <select className="form-control" style={{ width: 'auto', padding: '0.4rem 2.5rem 0.4rem 1rem' }} value={feedbackFilter} onChange={e => setFeedbackFilter(e.target.value)}>
-                                        <option value="ALL">All</option>
-                                        <option value="PENDING">Pending</option>
-                                        <option value="APPROVED">Acknowledged</option>
-                                    </select>
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    {feedback.filter(fb => feedbackFilter === 'ALL' || fb.approvalStatus === feedbackFilter).map(fb => (
-                                        <div key={fb.id} className="glass-card" style={{ padding: '1.5rem' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                                <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>From: {fb.user?.firstName} ({fb.user?.email})</span>
-                                                <span style={{
-                                                    color: fb.approvalStatus === 'APPROVED' ? 'var(--success)' : (fb.approvalStatus === 'REJECTED' ? 'var(--danger)' : 'var(--warning)'),
-                                                    padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem'
-                                                }}>
-                                                    {fb.approvalStatus}
-                                                </span>
-                                            </div>
-                                            <p style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>{fb.content}</p>
-                                            {fb.approvalStatus === 'PENDING' && (
-                                                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                                                    <button className="btn btn-primary" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem' }} onClick={() => handleApproveReject('feedback', fb.id, 'APPROVED')}>Acknowledge/Approve</button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                    {feedback.filter(fb => feedbackFilter === 'ALL' || fb.approvalStatus === feedbackFilter).length === 0 && <p style={{ color: 'var(--text-muted)' }}>No feedback found.</p>}
-                                </div>
-                            </div>
-                        )}
-
                         {activeTab === 'users' && (
                             <div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                                     <h2 style={{ fontSize: '2rem' }}>User Management</h2>
-                                    <select className="form-control" style={{ width: 'auto', padding: '0.4rem 2.5rem 0.4rem 1rem' }} value={userFilter} onChange={e => setUserFilter(e.target.value)}>
-                                        <option value="ALL">All Roles</option>
-                                        <option value="USER">User</option>
-                                        <option value="ADMIN">Admin</option>
-                                    </select>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <select className="form-control" style={{ width: 'auto', padding: '0.4rem 2.5rem 0.4rem 1rem' }} value={userStatusFilter} onChange={e => setUserStatusFilter(e.target.value)}>
+                                            <option value="ALL">All Statuses</option>
+                                            <option value="ACTIVE">Live</option>
+                                            <option value="SUSPENDED">Suspended</option>
+                                        </select>
+                                        <select className="form-control" style={{ width: 'auto', padding: '0.4rem 2.5rem 0.4rem 1rem' }} value={userFilter} onChange={e => setUserFilter(e.target.value)}>
+                                            <option value="ALL">All Roles</option>
+                                            <option value="USER">User</option>
+                                            <option value="ADMIN">Admin</option>
+                                        </select>
+                                    </div>
                                 </div>
+
+                                <dialog id="userActivityModal" className="glass-panel" style={{ padding: '2rem', border: 'none', borderRadius: '12px', minWidth: '500px', maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', margin: 'auto', position: 'fixed', top: '0', left: '0', right: '0', bottom: '0' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                        <h3 style={{ fontSize: '1.5rem', margin: 0 }}>User Activity</h3>
+                                        <button className="btn btn-outline" style={{ padding: '0.3rem 0.6rem' }} onClick={() => document.getElementById('userActivityModal').close()}>Close</button>
+                                    </div>
+                                    {!userActivity ? (
+                                        <p>Loading activity...</p>
+                                    ) : (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                            <p><strong>Name:</strong> {userActivity.firstName} {userActivity.lastName}</p>
+                                            <p><strong>Email:</strong> {userActivity.email}</p>
+                                            <hr style={{ borderColor: 'var(--border-color)', margin: '0.5rem 0' }} />
+                                            <div>
+                                                <h4>Apps Submitted ({userActivity.submittedApps?.length || 0})</h4>
+                                            </div>
+                                            <div>
+                                                <h4>Reviews Left ({userActivity.reviews?.length || 0})</h4>
+                                            </div>
+                                            <div>
+                                                <h4>Tutorials Submitted ({userActivity.submittedTutorials?.length || 0})</h4>
+                                            </div>
+                                            <div>
+                                                <h4>Forum Posts ({userActivity.forumPosts?.length || 0})</h4>
+                                            </div>
+                                            <div>
+                                                <h4>Forum Answers ({userActivity.forumAnswers?.length || 0})</h4>
+                                            </div>
+                                        </div>
+                                    )}
+                                </dialog>
+
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    {users.filter(u => userFilter === 'ALL' || u.role === userFilter).map(u => {
+                                    {users.filter(u => userFilter === 'ALL' || u.role === userFilter).filter(u => userStatusFilter === 'ALL' || (userStatusFilter === 'ACTIVE' ? !u.isSuspended : u.isSuspended)).map(u => {
                                         let daysRemainingMsg = null;
                                         if (u.isSuspended && u.suspendedAt) {
                                             const suspendedDate = new Date(u.suspendedAt);
@@ -535,6 +565,7 @@ const AdminDashboard = () => {
                                                 </div>
                                                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                                     <span style={{ padding: '0.3rem 0.8rem', background: 'var(--bg-tertiary)', borderRadius: '4px', fontSize: '0.8rem' }}>{u.role}</span>
+                                                    <button className="btn btn-outline" style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem' }} onClick={() => handleViewActivity(u.id)}>View Activity</button>
                                                     {u.role !== 'ADMIN' && (
                                                         <button
                                                             className="btn btn-outline"
@@ -548,7 +579,7 @@ const AdminDashboard = () => {
                                             </div>
                                         );
                                     })}
-                                    {users.filter(u => userFilter === 'ALL' || u.role === userFilter).length === 0 && (
+                                    {users.filter(u => userFilter === 'ALL' || u.role === userFilter).filter(u => userStatusFilter === 'ALL' || (userStatusFilter === 'ACTIVE' ? !u.isSuspended : u.isSuspended)).length === 0 && (
                                         <p style={{ color: 'var(--text-muted)' }}>No users found.</p>
                                     )}
                                 </div>
@@ -559,7 +590,7 @@ const AdminDashboard = () => {
                             <div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                                     <h2 style={{ fontSize: '2rem' }}>Categories & Heuristic Questions</h2>
-                                    <button className="btn btn-primary" onClick={() => { setEditingCategory(null); setCategoryForm({ name: '', description: '', questions: [] }); setDeletedQuestions([]); document.getElementById('categoryFormModal').showModal(); }}>+ Add Category</button>
+                                    <button className="btn btn-primary" onClick={() => { setEditingCategory(null); setCategoryForm({ name: '', description: '', iconName: '', questions: [] }); setDeletedQuestions([]); document.getElementById('categoryFormModal').showModal(); }}>+ Add Category</button>
                                 </div>
 
                                 <dialog id="categoryFormModal" className="glass-panel" style={{ padding: '2rem', border: 'none', borderRadius: '12px', minWidth: '400px', maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', margin: 'auto', position: 'fixed', top: '0', left: '0', right: '0', bottom: '0' }}>
@@ -572,6 +603,19 @@ const AdminDashboard = () => {
                                         <div className="form-group">
                                             <label className="form-label">Description</label>
                                             <textarea className="form-control" rows="3" value={categoryForm.description} onChange={e => setCategoryForm({ ...categoryForm, description: e.target.value })}></textarea>
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Icon (Optional)</label>
+                                            <select className="form-control" value={categoryForm.iconName || ''} onChange={e => setCategoryForm({ ...categoryForm, iconName: e.target.value })}>
+                                                <option value="">None</option>
+                                                <option value="IconHeart">Heart</option>
+                                                <option value="IconDeviceGamepad2">Gaming & Entertainment</option>
+                                                <option value="IconBriefcase">Business</option>
+                                                <option value="IconBook">Education</option>
+                                                <option value="IconCamera">Photography</option>
+                                                <option value="IconBuildingBank">Banking & Finance</option>
+                                                <option value="IconVideo">Video & Media</option>
+                                            </select>
                                         </div>
 
                                         <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
@@ -599,27 +643,33 @@ const AdminDashboard = () => {
 
                                         <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
                                             <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Save</button>
-                                            <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => { setCategoryForm({ name: '', description: '', questions: [] }); setDeletedQuestions([]); document.getElementById('categoryFormModal').close(); }}>Cancel</button>
+                                            <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => { setCategoryForm({ name: '', description: '', iconName: '', questions: [] }); setDeletedQuestions([]); document.getElementById('categoryFormModal').close(); }}>Cancel</button>
                                         </div>
                                     </form>
                                 </dialog>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                    {categories.map(cat => (
-                                        <div key={cat.id} className="glass-card" style={{ padding: '1.5rem', borderLeft: '4px solid var(--accent-blue)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflow: 'hidden' }}>
-                                            <div>
-                                                <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{cat.name}</h3>
-                                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>{cat.description}</p>
-                                                <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '1rem', fontWeight: 500 }}>
-                                                    {cat.questions?.length || 0} heuristic question{cat.questions?.length === 1 ? '' : 's'} defined
-                                                </p>
+                                    {categories.map(cat => {
+                                        const CategoryIcon = cat.iconName ? IconMap[cat.iconName] : null;
+                                        return (
+                                            <div key={cat.id} className="glass-card" style={{ padding: '1.5rem', borderLeft: '4px solid var(--accent-blue)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflow: 'hidden' }}>
+                                                <div>
+                                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        {CategoryIcon && <CategoryIcon size={24} style={{ color: 'var(--accent-blue)' }} />}
+                                                        {cat.name}
+                                                    </h3>
+                                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>{cat.description}</p>
+                                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '1rem', fontWeight: 500 }}>
+                                                        {cat.questions?.length || 0} heuristic question{cat.questions?.length === 1 ? '' : 's'} defined
+                                                    </p>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                    <button className="btn btn-outline" style={{ padding: '0.3rem 0.5rem', fontSize: '0.8rem' }} onClick={() => { setEditingCategory(cat); setCategoryForm({ name: cat.name, description: cat.description || '', iconName: cat.iconName || '', questions: cat.questions || [] }); setDeletedQuestions([]); document.getElementById('categoryFormModal').showModal(); }}>Edit Category</button>
+                                                    <button className="btn btn-outline" style={{ padding: '0.3rem 0.5rem', fontSize: '0.8rem', color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => handleCategoryDelete(cat.id)}>Delete</button>
+                                                </div>
                                             </div>
-                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                <button className="btn btn-outline" style={{ padding: '0.3rem 0.5rem', fontSize: '0.8rem' }} onClick={() => { setEditingCategory(cat); setCategoryForm({ name: cat.name, description: cat.description || '', questions: cat.questions || [] }); setDeletedQuestions([]); document.getElementById('categoryFormModal').showModal(); }}>Edit Category</button>
-                                                <button className="btn btn-outline" style={{ padding: '0.3rem 0.5rem', fontSize: '0.8rem', color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => handleCategoryDelete(cat.id)}>Delete</button>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                     {categories.length === 0 && <p style={{ color: 'var(--text-muted)' }}>No categories created yet.</p>}
                                 </div>
                             </div>
