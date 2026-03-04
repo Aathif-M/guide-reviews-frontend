@@ -188,7 +188,7 @@ const AppDetails = () => {
             }, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
-            setMessage({ type: 'success', text: 'Tutorial submitted successfully! It is now pending admin approval.' });
+            setMessage({ type: 'success', text: 'Tutorial sent for admin approval.' });
             setTutorialTitle('');
             setTutorialUrl('');
             setTimeout(() => window.location.reload(), 2000);

@@ -114,6 +114,22 @@ const Profile = () => {
                             <p style={{ color: 'var(--text-secondary)' }}>You haven't submitted any apps yet.</p>
                         )}
 
+                        <h3 style={{ fontSize: '1.25rem', margin: '2rem 0 1rem' }}>Submitted Tutorials</h3>
+                        {user.submittedTutorials?.length > 0 ? (
+                            user.submittedTutorials.map(tutorial => (
+                                <div key={tutorial.id} className="glass-card" style={{ padding: '1rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between' }}>
+                                    <div>
+                                        <strong>{tutorial.title}</strong>
+                                        <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>For app: {tutorial.app?.title || 'Unknown App'}</div>
+                                        <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Submitted on {new Date(tutorial.createdAt).toISOString().split('T')[0]}</div>
+                                    </div>
+                                    <span style={{ color: tutorial.approvalStatus === 'APPROVED' ? 'var(--success)' : tutorial.approvalStatus === 'REJECTED' ? 'var(--danger)' : 'var(--warning)' }}>{tutorial.approvalStatus}</span>
+                                </div>
+                            ))
+                        ) : (
+                            <p style={{ color: 'var(--text-secondary)' }}>You haven't submitted any tutorials yet.</p>
+                        )}
+
                         <h3 style={{ fontSize: '1.25rem', margin: '2rem 0 1rem' }}>My Reviews</h3>
                         {user.reviews?.length > 0 ? (
                             user.reviews.map(rev => (

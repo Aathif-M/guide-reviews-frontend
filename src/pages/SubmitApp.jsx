@@ -61,7 +61,7 @@ const SubmitApp = () => {
 
             // Assume axios automatically calculates multipart/form-data boundaries when passed FormData
             await axios.post('http://localhost:5000/api/v1/apps', submitData);
-            setMessage('Application submitted successfully! It is now pending admin review.');
+            setMessage('Application and optionally attached tutorials submitted successfully! Sent for admin approval.');
             setFormData({ title: '', description: '', categoryId: '', playstoreLink: '', appstoreLink: '' });
             setTutorials([]);
             setLogoFile(null);
