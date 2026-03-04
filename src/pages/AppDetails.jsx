@@ -167,7 +167,6 @@ const AppDetails = () => {
 
     const handleForumSubmit = async (e) => {
         e.preventDefault();
-        setMessage({ type: '', text: '' });
         try {
             const res = await axios.post(`http://localhost:5000/api/v1/apps/${id}/forums`, {
                 title: forumTitle,
@@ -175,11 +174,12 @@ const AppDetails = () => {
             }, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
-            addToast('Forum question posted successfully!', 'success');
-            const newPost = { ...res.data, user, answers: [], _count: { answers: 0 } };
+            addToast('Forum question posted successfully! It is pending admin approval.', 'success');
+            const newPost = { ...res.data, user, answers: [], _count: { answers: 0 }, approvalStatus: 'PENDING' };
             setForums([newPost, ...forums]);
             setForumTitle('');
             setForumContent('');
+            setShowForumForm(false);
         } catch (err) {
             addToast(err.response?.data?.error || 'Failed to post to forum', 'error');
         }
@@ -187,7 +187,6 @@ const AppDetails = () => {
 
     const handleAnswerSubmit = async (e, postId) => {
         e.preventDefault();
-        setMessage({ type: '', text: '' });
         try {
             const res = await axios.post(`http://localhost:5000/api/v1/forums/posts/${postId}/answers`, {
                 content: answerContent
@@ -195,8 +194,8 @@ const AppDetails = () => {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
 
-            addToast('Answer posted successfully!', 'success');
-            const newAnswer = { ...res.data, user };
+            addToast('Answer posted successfully! It is pending admin approval.', 'success');
+            const newAnswer = { ...res.data, user, approvalStatus: 'PENDING' };
 
             setForums(forums.map(f => {
                 if (f.id === postId) {
@@ -663,7 +662,7 @@ const AppDetails = () => {
                                         <button className="btn" style={{ background: 'var(--accent-purple)', color: 'white' }} onClick={() => setShowForumForm(true)}>Ask a Question</button>
                                     </div>
                                 ) : (
-                                    <form onSubmit={(e) => { handleForumSubmit(e); setShowForumForm(false); }} className="glass-card" style={{ padding: '1.5rem', marginBottom: '2rem', borderLeft: '4px solid var(--accent-purple)' }}>
+                                    <form onSubmit={handleForumSubmit} className="glass-card" style={{ padding: '1.5rem', marginBottom: '2rem', borderLeft: '4px solid var(--accent-purple)' }}>
                                         <h4 style={{ marginBottom: '1rem', fontSize: '1.2rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border-color)' }}>Ask a Question</h4>
                                         <div className="form-group">
                                             <label className="form-label">Question Title</label>
@@ -695,7 +694,11 @@ const AppDetails = () => {
                                         <div key={post.id} className="glass-card" style={{ padding: '1.5rem', borderLeft: '4px solid var(--accent-blue)', display: 'flex', flexDirection: 'column' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                                 <div>
-                                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>{post.title}</h3>
+                                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        {post.title}
+                                                        {post.approvalStatus === 'PENDING' && <span style={{ padding: '0.2rem 0.5rem', borderRadius: '4px', background: 'rgba(245, 158, 11, 0.1)', color: 'var(--warning)', fontSize: '0.75rem', fontWeight: 600 }}>PENDING APPROVAL</span>}
+                                                        {post.approvalStatus === 'REJECTED' && <span style={{ padding: '0.2rem 0.5rem', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', fontSize: '0.75rem', fontWeight: 600 }}>REJECTED</span>}
+                                                    </h3>
                                                     <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>{post.content}</p>
                                                     <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
                                                         <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{post.user?.firstName} {post.user?.lastName}</span> asks this question
@@ -744,7 +747,11 @@ const AppDetails = () => {
                                                             {/* Answer Content */}
                                                             <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                                                 <div>
-                                                                    <p style={{ color: 'var(--text-primary)', marginBottom: '0.5rem', fontSize: '1.05rem', lineHeight: '1.5' }}>{answer.content}</p>
+                                                                    <p style={{ color: 'var(--text-primary)', marginBottom: '0.5rem', fontSize: '1.05rem', lineHeight: '1.5', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                        {answer.content}
+                                                                        {answer.approvalStatus === 'PENDING' && <span style={{ padding: '0.2rem 0.5rem', borderRadius: '4px', background: 'rgba(245, 158, 11, 0.1)', color: 'var(--warning)', fontSize: '0.75rem', fontWeight: 600 }}>PENDING APPROVAL</span>}
+                                                                        {answer.approvalStatus === 'REJECTED' && <span style={{ padding: '0.2rem 0.5rem', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', fontSize: '0.75rem', fontWeight: 600 }}>REJECTED</span>}
+                                                                    </p>
                                                                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                                                                         Answered by <span style={{ fontWeight: 600 }}>{answer.user?.firstName} {answer.user?.lastName}</span> {answer.user?.role === 'ADMIN' && <span style={{ color: 'var(--warning)', fontSize: '0.7rem', padding: '0.1rem 0.3rem', border: '1px solid var(--warning)', borderRadius: '4px', marginLeft: '4px' }}>ADMIN</span>}
                                                                     </div>

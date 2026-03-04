@@ -4,16 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { IconHeart, IconDeviceGamepad2, IconBriefcase, IconBook, IconCamera, IconBuildingBank, IconVideo } from '@tabler/icons-react';
-
-const IconMap = {
-    IconHeart,
-    IconDeviceGamepad2,
-    IconBriefcase,
-    IconBook,
-    IconCamera,
-    IconBuildingBank,
-    IconVideo
-};
+import * as TablerIcons from '@tabler/icons-react';
+import IconPicker from '../components/IconPicker';
 
 /**
  * AdminDashboard Component
@@ -35,6 +27,7 @@ const AdminDashboard = () => {
     const [categories, setCategories] = useState([]);
     const [reviews, setReviews] = useState([]);
     const [tutorials, setTutorials] = useState([]);
+    const [pendingForums, setPendingForums] = useState({ posts: [], answers: [] });
 
     // Category Management Local States
     const [editingCategory, setEditingCategory] = useState(null);
@@ -45,7 +38,7 @@ const AdminDashboard = () => {
 
     // UI Feedback States
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('apps'); // Switch between 'apps' | 'users' | 'categories' | 'reviews' | 'tutorials'
+    const [activeTab, setActiveTab] = useState('apps'); // 'apps' | 'users' | 'categories' | 'reviews' | 'tutorials' | 'forums'
 
     // View Filters for Tabs
     const [appFilter, setAppFilter] = useState('ALL');
@@ -61,10 +54,12 @@ const AdminDashboard = () => {
     const [userSearch, setUserSearch] = useState('');
     const [tutorialSearch, setTutorialSearch] = useState('');
     const [categorySearch, setCategorySearch] = useState('');
+    const [forumSearch, setForumSearch] = useState('');
 
     // --- Additional Search & Filter States ---
     const [appCategoryFilter, setAppCategoryFilter] = useState('ALL');
     const [reviewRatingFilter, setReviewRatingFilter] = useState('ALL');
+    const [forumFilter, setForumFilter] = useState('PENDING');
 
     const navigate = useNavigate();
 
@@ -123,6 +118,15 @@ const AdminDashboard = () => {
         } catch (err) { console.error('Error fetching tutorials (via apps):', err); }
     };
 
+    const fetchPendingForums = async () => {
+        try {
+            const res = await axios.get('http://localhost:5000/api/v1/forums/pending', {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            setPendingForums(res.data);
+        } catch (err) { console.error('Error fetching pending forums:', err); }
+    };
+
     // Effect hook to re-fetch data when the active tab changes.
     useEffect(() => {
         const fetchAllDataForTab = async () => {
@@ -133,6 +137,7 @@ const AdminDashboard = () => {
                 case 'categories': await fetchCategories(); break;
                 case 'reviews': await fetchReviews(); break;
                 case 'tutorials': await fetchTutorials(); break;
+                case 'forums': await fetchPendingForums(); break;
                 default: break;
             }
             setLoading(false);
@@ -183,19 +188,22 @@ const AdminDashboard = () => {
      * @param {string} status - The new approval status ('APPROVED' | 'REJECTED').
      */
     const handleApproveReject = async (type, id, status) => {
-        // type: 'apps' | 'reviews' | 'tutorials'
+        // type: 'apps' | 'reviews' | 'tutorials' | 'forums/posts' | 'forums/answers'
         try {
 
             if (type === 'tutorials') {
-                await axios.patch(`http://localhost:5000/api/v1/apps/tutorials/${id}/approve`, { status });
+                await axios.patch(`http://localhost:5000/api/v1/apps/tutorials/${id}/approve`, { status }, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+            } else if (type.startsWith('forums')) {
+                await axios.patch(`http://localhost:5000/api/v1/${type}/${id}/approve`, { status }, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
             } else {
-                await axios.patch(`http://localhost:5000/api/v1/${type}/${id}/approve`, { status });
+                await axios.patch(`http://localhost:5000/api/v1/${type}/${id}/approve`, { status }, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
             }
 
             addToast(`Item was successfully ${status.toLowerCase()}`, 'success');
 
             if (type === 'apps' || type === 'tutorials') await fetchApps();
             if (type === 'reviews') await fetchReviews();
+            if (type.startsWith('forums')) await fetchPendingForums();
         } catch (err) {
             addToast('Error updating status', 'error');
         }
@@ -340,6 +348,13 @@ const AdminDashboard = () => {
                     style={{ width: '100%', justifyContent: 'flex-start', padding: '0.75rem 1rem' }}
                 >
                     Manage Categories
+                </button>
+                <button
+                    className={`btn ${activeTab === 'forums' ? 'btn-primary' : 'btn-outline'}`}
+                    onClick={() => { setActiveTab('forums'); }}
+                    style={{ width: '100%', justifyContent: 'flex-start', padding: '0.75rem 1rem' }}
+                >
+                    Moderate Forum
                 </button>
             </aside>
 
@@ -767,16 +782,11 @@ const AdminDashboard = () => {
                                         </div>
                                         <div className="form-group">
                                             <label className="form-label">Icon (Optional)</label>
-                                            <select className="form-control" value={categoryForm.iconName || ''} onChange={e => setCategoryForm({ ...categoryForm, iconName: e.target.value })}>
-                                                <option value="">None</option>
-                                                <option value="IconHeart">Heart</option>
-                                                <option value="IconDeviceGamepad2">Gaming & Entertainment</option>
-                                                <option value="IconBriefcase">Business</option>
-                                                <option value="IconBook">Education</option>
-                                                <option value="IconCamera">Photography</option>
-                                                <option value="IconBuildingBank">Banking & Finance</option>
-                                                <option value="IconVideo">Video & Media</option>
-                                            </select>
+                                            <IconPicker
+                                                value={categoryForm.iconName}
+                                                onChange={val => setCategoryForm({ ...categoryForm, iconName: val })}
+                                                categoryName={categoryForm.name}
+                                            />
                                         </div>
 
                                         <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
@@ -819,7 +829,7 @@ const AdminDashboard = () => {
                                             );
                                         })
                                         .map(cat => {
-                                            const CategoryIcon = cat.iconName ? IconMap[cat.iconName] : null;
+                                            const CategoryIcon = cat.iconName ? TablerIcons[cat.iconName] : null;
                                             return (
                                                 <div key={cat.id} className="glass-card" style={{ padding: '1.5rem', borderLeft: '4px solid var(--accent-blue)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflow: 'hidden' }}>
                                                     <div>
@@ -849,6 +859,105 @@ const AdminDashboard = () => {
                                         })
                                         .length === 0 && <p style={{ color: 'var(--text-muted)' }}>No categories created yet.</p>}
                                 </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'forums' && (
+                            <div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                    <h2 style={{ fontSize: '2rem' }}>Moderate Forums</h2>
+                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Search questions or apps..."
+                                            style={{ width: '250px' }}
+                                            value={forumSearch}
+                                            onChange={e => setForumSearch(e.target.value)}
+                                        />
+                                        <select className="form-control" style={{ width: 'auto', padding: '0.4rem 2.5rem 0.4rem 1rem' }} value={forumFilter} onChange={e => setForumFilter(e.target.value)}>
+                                            <option value="ALL">All Statuses</option>
+                                            <option value="PENDING">Pending</option>
+                                            <option value="APPROVED">Approved</option>
+                                            <option value="REJECTED">Rejected</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>Pending Questions ({pendingForums?.posts?.length || 0})</h3>
+                                {pendingForums?.posts?.length === 0 ? (
+                                    <p style={{ color: 'var(--text-muted)', marginBottom: '3rem' }}>No pending questions to moderate.</p>
+                                ) : (
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
+                                        {pendingForums.posts.filter(post => {
+                                            const matchesSearch = post.title.toLowerCase().includes(forumSearch.toLowerCase()) ||
+                                                post.content.toLowerCase().includes(forumSearch.toLowerCase()) ||
+                                                (post.app?.title && post.app.title.toLowerCase().includes(forumSearch.toLowerCase()));
+                                            const matchesFilter = forumFilter === 'ALL' || post.approvalStatus === forumFilter;
+                                            return matchesSearch && matchesFilter;
+                                        }).map(post => (
+                                            <div key={post.id} className="glass-card" style={{ padding: '1.5rem', borderLeft: '4px solid var(--warning)' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                    <div>
+                                                        <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>{post.title}</h4>
+                                                        <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>{post.content}</p>
+                                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                                            Posted by <strong style={{ color: 'var(--text-primary)' }}>{post.user?.firstName} {post.user?.lastName}</strong> for app <strong style={{ color: 'var(--text-primary)' }}>{post.app?.title}</strong>
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-end' }}>
+                                                        {post.approvalStatus === 'PENDING' ? (
+                                                            <>
+                                                                <button className="btn btn-outline" style={{ color: 'var(--success)', borderColor: 'var(--success)', padding: '0.4rem 1rem', width: '100%' }} onClick={() => handleApproveReject('forums/posts', post.id, 'APPROVED')}>Approve</button>
+                                                                <button className="btn btn-outline" style={{ color: 'var(--danger)', borderColor: 'var(--danger)', padding: '0.4rem 1rem', width: '100%' }} onClick={() => handleApproveReject('forums/posts', post.id, 'REJECTED')}>Reject</button>
+                                                            </>
+                                                        ) : (
+                                                            <span style={{ padding: '0.4rem 0.8rem', borderRadius: '4px', background: post.approvalStatus === 'APPROVED' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: post.approvalStatus === 'APPROVED' ? 'var(--success)' : 'var(--danger)', fontSize: '0.85rem', fontWeight: 600 }}>
+                                                                {post.approvalStatus}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>Pending Answers ({pendingForums?.answers?.length || 0})</h3>
+                                {pendingForums?.answers?.length === 0 ? (
+                                    <p style={{ color: 'var(--text-muted)' }}>No pending answers to moderate.</p>
+                                ) : (
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr)', gap: '1.5rem' }}>
+                                        {pendingForums.answers.filter(answer => {
+                                            const matchesSearch = answer.content.toLowerCase().includes(forumSearch.toLowerCase()) ||
+                                                (answer.post?.title && answer.post.title.toLowerCase().includes(forumSearch.toLowerCase()));
+                                            const matchesFilter = forumFilter === 'ALL' || answer.approvalStatus === forumFilter;
+                                            return matchesSearch && matchesFilter;
+                                        }).map(answer => (
+                                            <div key={answer.id} className="glass-card" style={{ padding: '1.5rem', borderLeft: '4px solid var(--warning)' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                    <div>
+                                                        <p style={{ color: 'var(--text-primary)', marginBottom: '1rem', fontSize: '1.05rem' }}>{answer.content}</p>
+                                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                                            Answered by <strong style={{ color: 'var(--text-primary)' }}>{answer.user?.firstName} {answer.user?.lastName}</strong> on question <strong style={{ color: 'var(--text-primary)' }}>{answer.post?.title}</strong>
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-end' }}>
+                                                        {answer.approvalStatus === 'PENDING' ? (
+                                                            <>
+                                                                <button className="btn btn-outline" style={{ color: 'var(--success)', borderColor: 'var(--success)', padding: '0.4rem 1rem', width: '100%' }} onClick={() => handleApproveReject('forums/answers', answer.id, 'APPROVED')}>Approve</button>
+                                                                <button className="btn btn-outline" style={{ color: 'var(--danger)', borderColor: 'var(--danger)', padding: '0.4rem 1rem', width: '100%' }} onClick={() => handleApproveReject('forums/answers', answer.id, 'REJECTED')}>Reject</button>
+                                                            </>
+                                                        ) : (
+                                                            <span style={{ padding: '0.4rem 0.8rem', borderRadius: '4px', background: answer.approvalStatus === 'APPROVED' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: answer.approvalStatus === 'APPROVED' ? 'var(--success)' : 'var(--danger)', fontSize: '0.85rem', fontWeight: 600 }}>
+                                                                {answer.approvalStatus}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         )}
                     </>

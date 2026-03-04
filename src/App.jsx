@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { IconSun, IconMoon } from '@tabler/icons-react';
 
 import Home from './pages/Home';
 import AppDetails from './pages/AppDetails';
@@ -20,6 +21,16 @@ const NotFound = () => <div className="container flex-center" style={{ minHeight
 
 const AppContent = () => {
   const { user, logout } = useAuth();
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+  };
 
   return (
     <div className="app-layout" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -35,6 +46,8 @@ const AppContent = () => {
         <nav>
           <ul className="flex-center" style={{ gap: '2rem', listStyle: 'none' }}>
             <li><a href="/" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Home</a></li>
+            <li><a href="/about" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>About Us</a></li>
+            <li><a href="/contact" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Contact Us</a></li>
             <li><a href={user ? "/submit" : "/login"} style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>+ Add App</a></li>
             {user ? (
               <>
@@ -57,6 +70,16 @@ const AppContent = () => {
                 <li><a href="/register" className="btn btn-primary" style={{ padding: '0.4rem 1rem' }}>Sign Up</a></li>
               </>
             )}
+            <li>
+              <button
+                onClick={toggleTheme}
+                className="btn btn-outline"
+                style={{ padding: '0.4rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                aria-label="Toggle Theme"
+              >
+                {theme === 'light' ? <IconMoon size={20} /> : <IconSun size={20} />}
+              </button>
+            </li>
           </ul>
         </nav>
       </header>
@@ -86,7 +109,7 @@ const AppContent = () => {
       </main>
 
       <Footer />
-    </div>
+    </div >
   );
 };
 

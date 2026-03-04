@@ -52,8 +52,6 @@ const Login = () => {
                 <h2 className="text-gradient" style={{ fontSize: '2rem', marginBottom: '0.5rem', textAlign: 'center' }}>Welcome Back</h2>
                 <p style={{ color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '2rem' }}>Sign in to continue to G.U.I.D.E.</p>
 
-                <p style={{ color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '2rem' }}>Sign in to continue to G.U.I.D.E.</p>
-
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label className="form-label">Email Address</label>

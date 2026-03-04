@@ -12,8 +12,6 @@ const Footer = () => {
         }}>
             <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
                 <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                    <Link to="/about" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>About Us</Link>
-                    <Link to="/contact" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Contact Us</Link>
                     <Link to="/terms" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Terms & Conditions</Link>
                 </div>
 
