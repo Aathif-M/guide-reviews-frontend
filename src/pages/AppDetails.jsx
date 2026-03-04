@@ -22,6 +22,8 @@ const AppDetails = () => {
     const [reviewText, setReviewText] = useState('');
     const [forumTitle, setForumTitle] = useState('');
     const [forumContent, setForumContent] = useState('');
+    const [answerContent, setAnswerContent] = useState(''); // Stores text for new answer
+    const [activeReplyPostId, setActiveReplyPostId] = useState(null); // Tracks which post the user is replying to
     const [tutorialTitle, setTutorialTitle] = useState('');
     const [tutorialUrl, setTutorialUrl] = useState('');
     const [questionAnswers, setQuestionAnswers] = useState({}); // Stores answers as { questionId: rating }
@@ -29,6 +31,7 @@ const AppDetails = () => {
     const [editingReviewId, setEditingReviewId] = useState(null);
     const [openTutorialId, setOpenTutorialId] = useState(null);
     const [showReviewForm, setShowReviewForm] = useState(false);
+    const [showForumForm, setShowForumForm] = useState(false);
 
     const [reviewSortOrder, setReviewSortOrder] = useState('newest'); // 'newest', 'oldest', 'highest', 'lowest'
     const [reviewFilterRating, setReviewFilterRating] = useState('all'); // 'all', '5', '4', etc.
@@ -168,13 +171,77 @@ const AppDetails = () => {
             const res = await axios.post(`http://localhost:5000/api/v1/apps/${id}/forums`, {
                 title: forumTitle,
                 content: forumContent
+            }, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
             setMessage({ type: 'success', text: 'Forum question posted successfully!' });
-            setForums([res.data, ...forums]);
+            const newPost = { ...res.data, user, answers: [], _count: { answers: 0 } };
+            setForums([newPost, ...forums]);
             setForumTitle('');
             setForumContent('');
         } catch (err) {
             setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to post to forum' });
+        }
+    };
+
+    const handleAnswerSubmit = async (e, postId) => {
+        e.preventDefault();
+        setMessage({ type: '', text: '' });
+        try {
+            const res = await axios.post(`http://localhost:5000/api/v1/forums/posts/${postId}/answers`, {
+                content: answerContent
+            }, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+
+            setMessage({ type: 'success', text: 'Answer posted successfully!' });
+            const newAnswer = { ...res.data, user };
+
+            setForums(forums.map(f => {
+                if (f.id === postId) {
+                    return { ...f, answers: [...(f.answers || []), newAnswer], _count: { answers: (f._count?.answers || 0) + 1 } };
+                }
+                return f;
+            }));
+            setAnswerContent('');
+            setActiveReplyPostId(null);
+        } catch (err) {
+            setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to post answer' });
+        }
+    };
+
+    const handleDeletePost = async (postId) => {
+        if (!window.confirm('Are you sure you want to delete this forum question?')) return;
+        try {
+            await axios.delete(`http://localhost:5000/api/v1/forums/posts/${postId}`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            setMessage({ type: 'success', text: 'Questions deleted successfully.' });
+            setForums(forums.filter(f => f.id !== postId));
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Failed to delete post.' });
+        }
+    };
+
+    const handleDeleteAnswer = async (postId, answerId) => {
+        if (!window.confirm('Are you sure you want to delete this answer?')) return;
+        try {
+            await axios.delete(`http://localhost:5000/api/v1/forums/answers/${answerId}`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            setMessage({ type: 'success', text: 'Answer deleted successfully.' });
+            setForums(forums.map(f => {
+                if (f.id === postId) {
+                    return {
+                        ...f,
+                        answers: f.answers.filter(a => a.id !== answerId),
+                        _count: { answers: Math.max(0, (f._count?.answers || 1) - 1) }
+                    };
+                }
+                return f;
+            }));
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Failed to delete answer.' });
         }
     };
 
@@ -572,20 +639,30 @@ const AppDetails = () => {
                     {/* FORUM TAB */}
                     {activeTab === 'forum' && (
                         <div>
-                            {/* Add Forum Post (Only standard Users) */}
-                            {user && user.role === 'USER' ? (
-                                <form onSubmit={handleForumSubmit} className="glass-card" style={{ padding: '1.5rem', marginBottom: '2rem', borderLeft: '4px solid var(--accent-purple)' }}>
-                                    <h4 style={{ marginBottom: '1rem', fontSize: '1.2rem' }}>Ask a Question</h4>
-                                    <div className="form-group">
-                                        <label className="form-label">Question Title</label>
-                                        <input type="text" className="form-control" required placeholder="e.g. How do I change the font size?" value={forumTitle} onChange={e => setForumTitle(e.target.value)} />
+                            {/* Add Forum Post */}
+                            {user ? (
+                                !showForumForm ? (
+                                    <div style={{ padding: '1.5rem', marginBottom: '2rem', background: 'var(--bg-tertiary)', borderRadius: '12px', border: '1px dashed var(--accent-purple)', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                                        <p style={{ color: 'var(--text-secondary)' }}>Have a question about this app? Ask the community!</p>
+                                        <button className="btn" style={{ background: 'var(--accent-purple)', color: 'white' }} onClick={() => setShowForumForm(true)}>Ask a Question</button>
                                     </div>
-                                    <div className="form-group">
-                                        <label className="form-label">Details</label>
-                                        <textarea className="form-control" rows="3" required placeholder="Explain what you are struggling with..." value={forumContent} onChange={e => setForumContent(e.target.value)}></textarea>
-                                    </div>
-                                    <button type="submit" className="btn " style={{ background: 'var(--accent-purple)', color: 'white' }}>Post Question</button>
-                                </form>
+                                ) : (
+                                    <form onSubmit={(e) => { handleForumSubmit(e); setShowForumForm(false); }} className="glass-card" style={{ padding: '1.5rem', marginBottom: '2rem', borderLeft: '4px solid var(--accent-purple)' }}>
+                                        <h4 style={{ marginBottom: '1rem', fontSize: '1.2rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border-color)' }}>Ask a Question</h4>
+                                        <div className="form-group">
+                                            <label className="form-label">Question Title</label>
+                                            <input type="text" className="form-control" required placeholder="e.g. How do I change the font size?" value={forumTitle} onChange={e => setForumTitle(e.target.value)} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Details</label>
+                                            <textarea className="form-control" rows="3" required placeholder="Explain what you are struggling with..." value={forumContent} onChange={e => setForumContent(e.target.value)}></textarea>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+                                            <button type="submit" className="btn" style={{ background: 'var(--accent-purple)', color: 'white' }}>Post Question</button>
+                                            <button type="button" className="btn btn-outline" onClick={() => setShowForumForm(false)}>Cancel</button>
+                                        </div>
+                                    </form>
+                                )
                             ) : !user && (
                                 <div style={{ padding: '1.5rem', background: 'var(--bg-tertiary)', borderRadius: '8px', marginBottom: '2rem', textAlign: 'center' }}>
                                     <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>Please log in to ask a question.</p>
@@ -597,14 +674,58 @@ const AppDetails = () => {
                             {forums.length === 0 ? (
                                 <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem 0' }}>No questions asked yet in this community.</p>
                             ) : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                                     {forums.map(post => (
-                                        <div key={post.id} className="glass-card" style={{ padding: '1.5rem', borderLeft: '3px solid var(--border-color)' }}>
-                                            <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>{post.title}</h3>
-                                            <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>{post.content}</p>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.875rem' }}>
-                                                <span style={{ color: 'var(--text-muted)' }}>Asked by {post.author?.firstName} {post.author?.lastName}</span>
-                                                <span style={{ background: 'var(--bg-tertiary)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>Answers: {post.answers?.length || 0}</span>
+                                        <div key={post.id} className="glass-card" style={{ padding: '1.5rem', borderLeft: '4px solid var(--accent-blue)', display: 'flex', flexDirection: 'column' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                <div>
+                                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>{post.title}</h3>
+                                                    <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>{post.content}</p>
+                                                    <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                                                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{post.user?.firstName} {post.user?.lastName}</span> asks this question
+                                                    </div>
+                                                </div>
+                                                {user?.role === 'ADMIN' && (
+                                                    <button className="btn btn-sm" style={{ background: 'var(--danger)', color: 'white' }} onClick={() => handleDeletePost(post.id)}>Delete Question</button>
+                                                )}
+                                            </div>
+
+                                            {/* Answers Section */}
+                                            <div style={{ marginLeft: '1rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
+                                                {post.answers && post.answers.length > 0 ? (
+                                                    post.answers.map(answer => (
+                                                        <div key={answer.id} style={{ padding: '1rem', background: 'var(--bg-tertiary)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                            <div>
+                                                                <p style={{ color: 'var(--text-primary)', marginBottom: '0.5rem' }}>{answer.content}</p>
+                                                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                                                    Answered by <span style={{ fontWeight: 600 }}>{answer.user?.firstName} {answer.user?.lastName}</span> {answer.user?.role === 'ADMIN' && <span style={{ color: 'var(--warning)', fontSize: '0.7rem', padding: '0.1rem 0.3rem', border: '1px solid var(--warning)', borderRadius: '4px', marginLeft: '4px' }}>ADMIN</span>}
+                                                                </div>
+                                                            </div>
+                                                            {user?.role === 'ADMIN' && (
+                                                                <button className="btn btn-sm btn-outline" style={{ color: 'var(--danger)', borderColor: 'var(--danger)', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }} onClick={() => handleDeleteAnswer(post.id, answer.id)}>Delete Answer</button>
+                                                            )}
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontStyle: 'italic' }}>No answers yet.</p>
+                                                )}
+
+                                                {/* Answer Form Trigger/Body */}
+                                                {user ? (
+                                                    activeReplyPostId === post.id ? (
+                                                        <form onSubmit={(e) => handleAnswerSubmit(e, post.id)} style={{ marginTop: '1rem' }}>
+                                                            <textarea className="form-control" rows="3" required placeholder="Write your answer here..." value={answerContent} onChange={(e) => setAnswerContent(e.target.value)} style={{ marginBottom: '0.5rem' }}></textarea>
+                                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                                <button type="submit" className="btn btn-sm" style={{ background: 'var(--success)', color: 'white' }}>Post Answer</button>
+                                                                <button type="button" className="btn btn-sm btn-outline" onClick={() => { setActiveReplyPostId(null); setAnswerContent(''); }}>Cancel</button>
+                                                            </div>
+                                                        </form>
+                                                    ) : (
+                                                        <button className="btn btn-sm btn-outline" style={{ width: 'fit-content', marginTop: '0.5rem' }} onClick={() => setActiveReplyPostId(post.id)}>Write an Answer</button>
+                                                    )
+                                                ) : (
+                                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Log in to post an answer.</p>
+                                                )}
                                             </div>
                                         </div>
                                     ))}
