@@ -1,60 +1,90 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import { useToast } from '../context/ToastContext';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 import { IconMail, IconPhone, IconMapPin, IconHeartHandshake, IconEyeCheck, IconShieldCheck } from '@tabler/icons-react';
 
-export const About = () => (
-    <div style={{ backgroundColor: 'var(--bg-main)', minHeight: '100vh', paddingBottom: '4rem' }}>
-        {/* Header Section */}
-        <section style={{ backgroundColor: '#1c1c1c', color: 'white', padding: '5rem 1.5rem', textAlign: 'center' }}>
-            <div className="container">
-                <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1rem' }}>
-                    About <span className="text-gradient">G.U.I.D.E.</span>
-                </h1>
-                <p style={{ fontSize: '1.25rem', opacity: 0.9, maxWidth: '700px', margin: '0 auto' }}>
-                    Bridging the digital divide by curating accessible, readable, and intuitive mobile experiences for the elderly community.
-                </p>
-            </div>
-        </section>
+export const About = () => {
+    const containerRef = useRef(null);
 
-        {/* Story & Mission */}
-        <section className="container" style={{ padding: '4rem 1.5rem' }}>
-            <div className="grid-cols-2" style={{ gap: '4rem', alignItems: 'center' }}>
-                <div>
-                    <h2 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '1.5rem' }}>Our Story</h2>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', lineHeight: 1.8, marginBottom: '1rem' }}>
-                        G.U.I.D.E. (Generational Usability Index for Digital Engagement) was developed as a finalized BSc Software Engineering project focusing on a critical but often overlooked demographic: older adults navigating a rapidly digitizing world.
-                    </p>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', lineHeight: 1.8 }}>
-                        We recognized that while thousands of apps exist, very few are designed with the cognitive and visual needs of seniors in mind. This platform was born out of a desire to highlight tools that genuinely empower users, regardless of age.
+    useGSAP(() => {
+        const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+        tl.fromTo('.about-header h1',
+            { y: 30, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.8 }
+        )
+            .fromTo('.about-header p',
+                { y: 20, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.8 },
+                '-=0.6'
+            )
+            .fromTo('.about-content > div',
+                { y: 40, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.8, stagger: 0.2 },
+                '-=0.4'
+            )
+            .fromTo('.glass-panel',
+                { x: 30, opacity: 0 },
+                { x: 0, opacity: 1, duration: 0.6, stagger: 0.15 },
+                '-=0.6'
+            );
+    }, { scope: containerRef });
+
+    return (
+        <div ref={containerRef} style={{ backgroundColor: 'var(--bg-main)', minHeight: '100vh', paddingBottom: '4rem' }}>
+            {/* Header Section */}
+            <section className="about-header" style={{ backgroundColor: '#1c1c1c', color: 'white', padding: '5rem 1.5rem', textAlign: 'center' }}>
+                <div className="container">
+                    <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1rem' }}>
+                        About <span className="text-gradient">G.U.I.D.E.</span>
+                    </h1>
+                    <p style={{ fontSize: '1.25rem', opacity: 0.9, maxWidth: '700px', margin: '0 auto' }}>
+                        Bridging the digital divide by curating accessible, readable, and intuitive mobile experiences for the elderly community.
                     </p>
                 </div>
+            </section>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                        <div style={{ backgroundColor: 'rgba(59,130,246,0.1)', padding: '1rem', borderRadius: '12px' }}>
-                            <IconEyeCheck size={32} style={{ color: 'var(--accent-blue)' }} />
-                        </div>
-                        <div>
-                            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Accessibility First</h3>
-                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>We evaluate apps strictly on font readability, contrast ratios, and intuitive navigation.</p>
-                        </div>
+            {/* Story & Mission */}
+            <section className="container about-content" style={{ padding: '4rem 1.5rem' }}>
+                <div className="grid-cols-2" style={{ gap: '4rem', alignItems: 'center' }}>
+                    <div>
+                        <h2 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '1.5rem' }}>Our Story</h2>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', lineHeight: 1.8, marginBottom: '1rem' }}>
+                            G.U.I.D.E. (Generational Usability Index for Digital Engagement) was developed as a finalized BSc Software Engineering project focusing on a critical but often overlooked demographic: older adults navigating a rapidly digitizing world.
+                        </p>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', lineHeight: 1.8 }}>
+                            We recognized that while thousands of apps exist, very few are designed with the cognitive and visual needs of seniors in mind. This platform was born out of a desire to highlight tools that genuinely empower users, regardless of age.
+                        </p>
                     </div>
 
-                    <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                        <div style={{ backgroundColor: 'rgba(139,92,246,0.1)', padding: '1rem', borderRadius: '12px' }}>
-                            <IconHeartHandshake size={32} style={{ color: '#8b5cf6' }} />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                            <div style={{ backgroundColor: 'rgba(59,130,246,0.1)', padding: '1rem', borderRadius: '12px' }}>
+                                <IconEyeCheck size={32} style={{ color: 'var(--accent-blue)' }} />
+                            </div>
+                            <div>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Accessibility First</h3>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>We evaluate apps strictly on font readability, contrast ratios, and intuitive navigation.</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Community Driven</h3>
-                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Real reviews from real users. A crowdsourced platform mirroring transparent community insights.</p>
+
+                        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                            <div style={{ backgroundColor: 'rgba(139,92,246,0.1)', padding: '1rem', borderRadius: '12px' }}>
+                                <IconHeartHandshake size={32} style={{ color: '#8b5cf6' }} />
+                            </div>
+                            <div>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Community Driven</h3>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Real reviews from real users. A crowdsourced platform mirroring transparent community insights.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
-    </div>
-);
+            </section>
+        </div>
+    );
+};
 
 /**
  * Contact Page Component
@@ -166,44 +196,67 @@ export const Contact = () => {
     );
 };
 
-export const Terms = () => (
-    <div className="container" style={{ padding: '4rem 1.5rem', minHeight: '80vh', maxWidth: '800px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <div style={{ width: '80px', height: '80px', backgroundColor: 'rgba(59,130,246,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-                <IconShieldCheck size={40} style={{ color: 'var(--accent-blue)' }} />
+export const Terms = () => {
+    const containerRef = useRef(null);
+
+    useGSAP(() => {
+        const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+
+        tl.fromTo('.terms-header',
+            { y: 30, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.8 }
+        )
+            .fromTo('.terms-card',
+                { y: 40, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.8 },
+                '-=0.5'
+            )
+            .fromTo('.terms-section',
+                { x: -20, opacity: 0 },
+                { x: 0, opacity: 1, duration: 0.6, stagger: 0.15 },
+                '-=0.4'
+            );
+    }, { scope: containerRef });
+
+    return (
+        <div ref={containerRef} className="container" style={{ padding: '4rem 1.5rem', minHeight: '80vh', maxWidth: '800px' }}>
+            <div className="terms-header" style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                <div style={{ width: '80px', height: '80px', backgroundColor: 'rgba(59,130,246,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                    <IconShieldCheck size={40} style={{ color: 'var(--accent-blue)' }} />
+                </div>
+                <h1 style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '1rem' }}>Terms & Conditions</h1>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>Please read these terms carefully before using the G.U.I.D.E. platform.</p>
             </div>
-            <h1 style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '1rem' }}>Terms & Conditions</h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>Please read these terms carefully before using the G.U.I.D.E. platform.</p>
+
+            <div className="glass-panel" style={{ padding: '3rem', borderRadius: '16px' }}>
+                <div className="terms-section" style={{ marginBottom: '2.5rem' }}>
+                    <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '1rem' }}>1. Acceptance of Terms</h3>
+                    <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+                        By accessing and using the Generational Usability Index for Digital Engagement (G.U.I.D.E.) platform, you explicitly accept and agree to be bound by the terms and provisions of this agreement.
+                    </p>
+                </div>
+
+                <div className="terms-section" style={{ marginBottom: '2.5rem' }}>
+                    <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '1rem' }}>2. Platform Scope and Usage</h3>
+                    <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+                        The primary objective of this platform is to collate and present heuristic data determining the usability of software for elderly individuals. All submitted reviews, tutorials, and forum posts must strictly pertain to these usability standards. Off-topic, promotional, or abusive content will be removed immediately.
+                    </p>
+                </div>
+
+                <div className="terms-section" style={{ marginBottom: '2.5rem' }}>
+                    <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '1rem' }}>3. Content Moderation</h3>
+                    <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+                        To ensure the integrity of our trust-based ecosystem, all user-submitted reviews, apps, and forum queries are routed through a rigorous administrative moderation process. We reserve the right to reject or delete content that violates our community guidelines without prior notice.
+                    </p>
+                </div>
+
+                <div className="terms-section" style={{ marginBottom: '1rem' }}>
+                    <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '1rem' }}>4. Data Privacy</h3>
+                    <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+                        We do not sell user data to third parties. Email addresses and basic profile information are used strictly for communication, moderation updates, and localized recommendations.
+                    </p>
+                </div>
+            </div>
         </div>
-
-        <div className="glass-panel" style={{ padding: '3rem', borderRadius: '16px' }}>
-            <div style={{ marginBottom: '2.5rem' }}>
-                <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '1rem' }}>1. Acceptance of Terms</h3>
-                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8 }}>
-                    By accessing and using the Generational Usability Index for Digital Engagement (G.U.I.D.E.) platform, you explicitly accept and agree to be bound by the terms and provisions of this agreement.
-                </p>
-            </div>
-
-            <div style={{ marginBottom: '2.5rem' }}>
-                <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '1rem' }}>2. Platform Scope and Usage</h3>
-                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8 }}>
-                    The primary objective of this platform is to collate and present heuristic data determining the usability of software for elderly individuals. All submitted reviews, tutorials, and forum posts must strictly pertain to these usability standards. Off-topic, promotional, or abusive content will be removed immediately.
-                </p>
-            </div>
-
-            <div style={{ marginBottom: '2.5rem' }}>
-                <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '1rem' }}>3. Content Moderation</h3>
-                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8 }}>
-                    To ensure the integrity of our trust-based ecosystem, all user-submitted reviews, apps, and forum queries are routed through a rigorous administrative moderation process. We reserve the right to reject or delete content that violates our community guidelines without prior notice.
-                </p>
-            </div>
-
-            <div style={{ marginBottom: '1rem' }}>
-                <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '1rem' }}>4. Data Privacy</h3>
-                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8 }}>
-                    We do not sell user data to third parties. Email addresses and basic profile information are used strictly for communication, moderation updates, and localized recommendations.
-                </p>
-            </div>
-        </div>
-    </div>
-);
+    );
+};

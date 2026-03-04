@@ -67,6 +67,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+a,
+button {
+  text-decoration: none;
+}
+
 /* Glassmorphism Utilities */
 .glass-panel {
   background: var(--glass-bg);

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { IconBrandGooglePlay, IconBrandApple, IconChevronDown, IconChevronUp, IconArrowBigUp, IconArrowBigDown } from '@tabler/icons-react';
@@ -82,14 +83,36 @@ const AppDetails = () => {
         fetchData();
     }, [id]);
 
-    useEffect(() => {
+    // Main App Detail Entry Animation
+    useGSAP(() => {
         if (!loading && app) {
-            gsap.fromTo(containerRef.current,
+            const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+            // Animate Header (Logo + Title)
+            tl.fromTo('.app-header-anim',
                 { opacity: 0, y: 30 },
-                { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }
-            );
+                { opacity: 1, y: 0, duration: 0.6 }
+            )
+                // Animate Description
+                .fromTo('.app-desc-anim',
+                    { opacity: 0, y: 20 },
+                    { opacity: 1, y: 0, duration: 0.5 },
+                    '-=0.3'
+                )
+                // Stagger Tutorials
+                .fromTo('.app-tut-anim',
+                    { opacity: 0, x: -20 },
+                    { opacity: 1, x: 0, duration: 0.5, stagger: 0.1 },
+                    '-=0.3'
+                )
+                // Animate the bottom Tabs section entirely
+                .fromTo('.app-tabs-anim',
+                    { opacity: 0, scale: 0.98, y: 30 },
+                    { opacity: 1, scale: 1, y: 0, duration: 0.7 },
+                    '-=0.2'
+                );
         }
-    }, [loading, app]);
+    }, [loading, app, containerRef]);
 
     const handleReviewSubmit = async (e) => {
         e.preventDefault();
@@ -293,7 +316,7 @@ const AppDetails = () => {
             </button>
 
             <div className="glass-panel" style={{ padding: '3rem', marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <div className="app-header-anim" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                         {app.logoUrl && (
                             <img src={app.logoUrl?.startsWith('/uploads') ? `http://localhost:5000${app.logoUrl}` : app.logoUrl} alt={`${app.title} logo`} style={{ width: '80px', height: '80px', borderRadius: '16px', objectFit: 'cover' }} />
@@ -342,16 +365,16 @@ const AppDetails = () => {
                     </div>
                 </div>
 
-                <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '2rem' }}>
+                <p className="app-desc-anim" style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '2rem' }}>
                     {app.description}
                 </p>
 
                 {app.tutorials && app.tutorials.length > 0 && (
                     <div style={{ marginBottom: '3rem' }}>
-                        <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>Tutorial Videos</h3>
+                        <h3 className="app-tut-anim" style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>Tutorial Videos</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             {app.tutorials.map((tutorial) => (
-                                <div key={tutorial.id} style={{ border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden' }}>
+                                <div key={tutorial.id} className="app-tut-anim" style={{ border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden' }}>
                                     <button
                                         onClick={() => setOpenTutorialId(openTutorialId === tutorial.id ? null : tutorial.id)}
                                         style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'var(--bg-lighter)', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '500' }}
@@ -379,14 +402,14 @@ const AppDetails = () => {
                 )}
 
                 {app.tutorials && app.tutorials.length === 0 && (
-                    <div style={{ marginBottom: '3rem' }}>
+                    <div className="app-tut-anim" style={{ marginBottom: '3rem' }}>
                         <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>Tutorial Videos</h3>
                         <p style={{ color: 'var(--text-muted)' }}>No tutorials available yet.</p>
                     </div>
                 )}
 
                 {user && (
-                    <div style={{ padding: '1.5rem', background: 'var(--bg-tertiary)', borderRadius: '12px', border: '1px dashed var(--border-color)', marginBottom: '3rem' }}>
+                    <div className="app-tut-anim" style={{ padding: '1.5rem', background: 'var(--bg-tertiary)', borderRadius: '12px', border: '1px dashed var(--border-color)', marginBottom: '3rem' }}>
                         <h4 style={{ marginBottom: '1rem' }}>Suggest a Tutorial</h4>
                         <form onSubmit={handleTutorialSubmit} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                             <div className="form-group" style={{ flex: '1 1 200px', marginBottom: 0 }}>
@@ -402,7 +425,7 @@ const AppDetails = () => {
             </div>
 
             {/* Interactive Section: Reviews & Forums */}
-            <div className="glass-panel" style={{ padding: '0' }}>
+            <div className="glass-panel app-tabs-anim" style={{ padding: '0' }}>
                 <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)' }}>
                     <button
                         style={{ flex: 1, padding: '1.5rem', background: activeTab === 'reviews' ? 'rgba(59, 130, 246, 0.05)' : 'transparent', border: 'none', borderBottom: activeTab === 'reviews' ? '2px solid var(--accent-blue)' : '2px solid transparent', fontSize: '1.2rem', fontWeight: 600, color: activeTab === 'reviews' ? 'var(--accent-blue)' : 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' }}
