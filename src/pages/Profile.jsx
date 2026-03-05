@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import gsap from 'gsap';
 import { useToast } from '../context/ToastContext';
 
 const Profile = () => {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const { addToast } = useToast();
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('settings');
     const [formData, setFormData] = useState({
         firstName: user?.firstName || '',
@@ -66,6 +68,17 @@ const Profile = () => {
                         onClick={() => setActiveTab('activity')}
                     >
                         My Activity
+                    </button>
+                    <button
+                        className="btn btn-outline"
+                        style={{ color: 'var(--danger)', borderColor: 'var(--danger)', marginTop: '0.5rem' }}
+                        onClick={() => {
+                            logout();
+                            addToast('Successfully logged out.', 'success');
+                            navigate('/login');
+                        }}
+                    >
+                        Logout
                     </button>
                 </div>
             </aside>

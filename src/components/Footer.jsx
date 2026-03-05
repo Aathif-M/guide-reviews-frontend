@@ -16,8 +16,7 @@ const Footer = ({ theme }) => {
                     {/* Brand Section */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <img src={theme === 'dark' ? '/assets/logo-dark.png' : '/assets/logo-light.png'} alt="G.U.I.D.E. Logo" style={{ height: '32px', objectFit: 'contain' }} />
-                            <h3 className="text-gradient" style={{ fontSize: '1.5rem', margin: 0 }}>G.U.I.D.E.</h3>
+                            <img src={theme === 'dark' ? '/assets/logo-dark.png' : '/assets/logo-light.png'} alt="G.U.I.D.E. Logo" style={{ height: '52px', objectFit: 'contain' }} />
                         </div>
                         <p style={{ fontSize: '0.9rem', lineHeight: '1.5', opacity: 0.8 }}>
                             Geriatric Usability Index & Digital Evaluation platform. Empowering the elderly through accessible technology analysis.
@@ -26,7 +25,8 @@ const Footer = ({ theme }) => {
                             <a href="#" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e) => e.target.style.color = 'var(--text-primary)'} onMouseOut={(e) => e.target.style.color = 'var(--text-muted)'}><IconBrandFacebook size={20} /></a>
                             <a href="#" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e) => e.target.style.color = 'var(--text-primary)'} onMouseOut={(e) => e.target.style.color = 'var(--text-muted)'}><IconBrandTwitter size={20} /></a>
                             <a href="#" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e) => e.target.style.color = 'var(--text-primary)'} onMouseOut={(e) => e.target.style.color = 'var(--text-muted)'}><IconBrandInstagram size={20} /></a>
-                            <a href="#" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e) => e.target.style.color = 'var(--text-primary)'} onMouseOut={(e) => e.target.style.color = 'var(--text-muted)'}><IconBrandGithub size={20} /></a>
+                            <a href="https://github.com/Aathif-M/guide-reviews-frontend" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s', display: 'flex', alignItems: 'center', gap: '4px' }} onMouseOver={(e) => e.target.style.color = 'var(--text-primary)'} onMouseOut={(e) => e.target.style.color = 'var(--text-muted)'}><IconBrandGithub size={20} /><span style={{ fontSize: '0.8rem' }}>Frontend Repo</span></a>
+                            <a href="https://github.com/Aathif-M/guide-reviews-backend" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s', display: 'flex', alignItems: 'center', gap: '4px' }} onMouseOver={(e) => e.target.style.color = 'var(--text-primary)'} onMouseOut={(e) => e.target.style.color = 'var(--text-muted)'}><IconBrandGithub size={20} /><span style={{ fontSize: '0.8rem' }}>Backend Repo</span></a>
                         </div>
                     </div>
 
@@ -42,8 +42,6 @@ const Footer = ({ theme }) => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
                         <h4 style={{ color: 'var(--text-primary)', fontSize: '1.1rem', marginBottom: '0.5rem' }}>Legal</h4>
                         <Link to="/terms" style={{ color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e) => e.target.style.color = 'var(--accent-blue)'} onMouseOut={(e) => e.target.style.color = 'var(--text-secondary)'}>Terms & Conditions</Link>
-                        <Link to="/terms" style={{ color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e) => e.target.style.color = 'var(--accent-blue)'} onMouseOut={(e) => e.target.style.color = 'var(--text-secondary)'}>Privacy Policy</Link>
-                        <Link to="/terms" style={{ color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={(e) => e.target.style.color = 'var(--accent-blue)'} onMouseOut={(e) => e.target.style.color = 'var(--text-secondary)'}>Cookie Guidelines</Link>
                     </div>
                 </div>
 

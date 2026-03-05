@@ -258,7 +258,10 @@ const Home = () => {
                     justifyContent: 'center'
                 }}>
                     <div
-                        onClick={() => setSelectedCategory('All')}
+                        onClick={() => {
+                            setSelectedCategory('All');
+                            window.scrollTo({ top: document.getElementById('apps-section').offsetTop - 100, behavior: 'smooth' });
+                        }}
                         style={{
                             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem',
                             padding: '1.5rem 1rem', backgroundColor: selectedCategory === 'All' ? 'rgba(14, 165, 233, 0.1)' : 'var(--bg-secondary)',
@@ -281,7 +284,10 @@ const Home = () => {
                         return (
                             <div
                                 key={catName}
-                                onClick={() => setSelectedCategory(catName)}
+                                onClick={() => {
+                                    setSelectedCategory(catName);
+                                    window.scrollTo({ top: document.getElementById('apps-section').offsetTop - 100, behavior: 'smooth' });
+                                }}
                                 style={{
                                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem',
                                     padding: '1.5rem 1rem', backgroundColor: isSelected ? 'rgba(14, 165, 233, 0.1)' : 'var(--bg-secondary)',
@@ -304,7 +310,7 @@ const Home = () => {
 
             {/* RECENT REVIEWS SECTION */}
             {recentReviews.length > 0 && (
-                <section ref={recentReviewsRef} style={{ backgroundColor: 'var(--bg-tertiary)', padding: '4rem 0' }}>
+                <section id="recent-reviews" ref={recentReviewsRef} style={{ backgroundColor: 'var(--bg-tertiary)', padding: '4rem 0' }}>
                     <div className="container" style={{ padding: '0 1.5rem' }}>
                         <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '2rem', color: 'var(--text-primary)' }}>
                             Recent reviews
@@ -457,7 +463,7 @@ const Home = () => {
             </section>
 
             {/* HOW IT WORKS SECTION */}
-            <section style={{ padding: '4rem 1.5rem', backgroundColor: 'var(--bg-main)' }}>
+            <section id="how-it-works" style={{ padding: '4rem 1.5rem', backgroundColor: 'var(--bg-main)' }}>
                 <div className="container" style={{ textAlign: 'center' }}>
                     <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-primary)' }}>
                         How it works

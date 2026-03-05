@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Link, NavLink, useLocation } from 'react-router-dom';
 import { IconSun, IconMoon } from '@tabler/icons-react';
 
 import Home from './pages/Home';
@@ -15,12 +15,14 @@ import SubmitApp from './pages/SubmitApp';
 import EditApp from './pages/EditApp';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './context/AuthContext';
-import { ToastProvider } from './context/ToastContext';
+import { ToastProvider, useToast } from './context/ToastContext';
 
 const NotFound = () => <div className="container flex-center" style={{ minHeight: '80vh' }}><h1>404 Not Found</h1></div>;
 
 const AppContent = () => {
   const { user, logout } = useAuth();
+  const { addToast } = useToast();
+  const location = useLocation();
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
   useEffect(() => {
@@ -47,34 +49,38 @@ const AppContent = () => {
               alt="G.U.I.D.E. Logo"
               style={{ height: '40px', objectFit: 'contain' }}
             />
-            <span className="text-gradient" style={{ fontSize: '1.5rem', fontWeight: 700 }}>G.U.I.D.E.</span>
+            {/* <span className="text-gradient" style={{ fontSize: '1.5rem', fontWeight: 700 }}>G.U.I.D.E.</span> */}
           </Link>
         </div>
         <nav>
           <ul className="flex-center" style={{ gap: '2rem', listStyle: 'none' }}>
-            <li><a href="/" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Home</a></li>
-            <li><a href="/about" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>About Us</a></li>
-            <li><a href="/contact" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Contact Us</a></li>
-            <li><a href={user ? "/submit" : "/login"} style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>+ Add App</a></li>
+            <li><NavLink to="/" style={({ isActive }) => ({ color: isActive ? 'var(--accent-blue)' : 'var(--text-primary)', textDecoration: 'none', fontWeight: isActive ? 600 : 400, textShadow: isActive ? '0 0 12px rgba(59, 130, 246, 0.5)' : 'none' })}>Home</NavLink></li>
+            <li><NavLink to="/about" style={({ isActive }) => ({ color: isActive ? 'var(--accent-blue)' : 'var(--text-primary)', textDecoration: 'none', fontWeight: isActive ? 600 : 400, textShadow: isActive ? '0 0 12px rgba(59, 130, 246, 0.5)' : 'none' })}>About Us</NavLink></li>
+            <li><NavLink to="/contact" style={({ isActive }) => ({ color: isActive ? 'var(--accent-blue)' : 'var(--text-primary)', textDecoration: 'none', fontWeight: isActive ? 600 : 400, textShadow: isActive ? '0 0 12px rgba(59, 130, 246, 0.5)' : 'none' })}>Contact Us</NavLink></li>
+            {(!user || user.role !== 'ADMIN') && (
+              <li><NavLink to={user ? "/submit" : "/login"} state={!user ? { from: location } : undefined} style={({ isActive }) => ({ color: isActive ? 'var(--accent-blue)' : 'var(--text-primary)', textDecoration: 'none', fontWeight: isActive ? 600 : 400, textShadow: isActive ? '0 0 12px rgba(59, 130, 246, 0.5)' : 'none' })}>+ Add App</NavLink></li>
+            )}
             {user ? (
               <>
                 {user.role === 'ADMIN' && (
-                  <li><a href="/admin" style={{ color: 'var(--accent-blue)', fontWeight: 600, textDecoration: 'none' }}>Admin Dashboard</a></li>
+                  <li><NavLink to="/admin" style={({ isActive }) => ({ color: 'var(--accent-blue)', fontWeight: isActive ? 800 : 600, textDecoration: isActive ? 'underline' : 'none', textUnderlineOffset: '4px', textShadow: isActive ? '0 0 12px rgba(59, 130, 246, 0.5)' : 'none' })}>Admin Dashboard</NavLink></li>
                 )}
                 <li>
-                  <a href="/profile" style={{ color: 'var(--text-secondary)', fontWeight: 500, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <NavLink to="/profile" style={({ isActive }) => ({ color: isActive ? 'var(--accent-blue)' : 'var(--text-secondary)', fontWeight: isActive ? 600 : 500, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', textShadow: isActive ? '0 0 12px rgba(59, 130, 246, 0.5)' : 'none' })}>
                     Hello, {user.firstName}
                     {user.role === 'ADMIN' && <span style={{ fontSize: '0.75rem', background: 'rgba(245, 158, 11, 0.2)', color: 'var(--warning)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>ADMIN</span>}
-                  </a>
+                  </NavLink>
                 </li>
-                <li>
-                  <button onClick={logout} className="btn btn-outline" style={{ padding: '0.4rem 1rem' }}>Logout</button>
-                </li>
+                {/* <li>
+                  <button onClick={() => {
+                    logout();
+                    addToast('Successfully logged out.', 'success');
+                  }} className="btn btn-outline" style={{ padding: '0.4rem 1rem' }}>Logout</button>
+                </li> */}
               </>
             ) : (
               <>
-                <li><a href="/login" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Login</a></li>
-                <li><a href="/register" className="btn btn-primary" style={{ padding: '0.4rem 1rem' }}>Sign Up</a></li>
+                <li><Link to="/login" state={{ from: location }} className="btn btn-primary" style={{ padding: '0.4rem 1rem' }}>Login</Link></li>
               </>
             )}
             <li>

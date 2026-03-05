@@ -92,11 +92,36 @@ export const About = () => {
  * Uses the global ToastContext to provide non-blocking user feedback upon submission.
  */
 export const Contact = () => {
+    const containerRef = useRef(null);
     // State to hold the user's input before transmission
     const [formData, setFormData] = useState({ fullName: '', email: '', message: '' });
     // State to act as a blocker for duplicate or rapid submissions
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { addToast } = useToast();
+
+    useGSAP(() => {
+        const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+        tl.fromTo('.contact-header h1',
+            { y: 30, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.8 }
+        )
+            .fromTo('.contact-header p',
+                { y: 20, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.8 },
+                '-=0.6'
+            )
+            .fromTo('.contact-info-item',
+                { x: -30, opacity: 0 },
+                { x: 0, opacity: 1, duration: 0.6, stagger: 0.2 },
+                '-=0.4'
+            )
+            .fromTo('.contact-form-panel',
+                { y: 40, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.8 },
+                '-=0.8'
+            );
+    }, { scope: containerRef });
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -118,9 +143,9 @@ export const Contact = () => {
     };
 
     return (
-        <div style={{ backgroundColor: 'var(--bg-main)', minHeight: '100vh', paddingBottom: '4rem' }}>
+        <div ref={containerRef} style={{ backgroundColor: 'var(--bg-main)', minHeight: '100vh', paddingBottom: '4rem' }}>
             {/* Header Section */}
-            <section style={{ backgroundColor: '#1c1c1c', color: 'white', padding: '5rem 1.5rem', textAlign: 'center', marginBottom: '4rem' }}>
+            <section className="contact-header" style={{ backgroundColor: '#1c1c1c', color: 'white', padding: '5rem 1.5rem', textAlign: 'center', marginBottom: '4rem' }}>
                 <div className="container">
                     <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1rem' }}>
                         Get in <span className="text-gradient">Touch</span>
@@ -138,7 +163,7 @@ export const Contact = () => {
                         <h2 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '2rem' }}>Contact Information</h2>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                            <div className="contact-info-item" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                                 <div style={{ width: '64px', height: '64px', backgroundColor: 'var(--bg-tertiary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <IconMail size={28} style={{ color: 'var(--accent-blue)' }} />
                                 </div>
@@ -148,7 +173,7 @@ export const Contact = () => {
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                            <div className="contact-info-item" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                                 <div style={{ width: '64px', height: '64px', backgroundColor: 'var(--bg-tertiary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <IconPhone size={28} style={{ color: 'var(--warning)' }} />
                                 </div>
@@ -158,7 +183,7 @@ export const Contact = () => {
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                            <div className="contact-info-item" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                                 <div style={{ width: '64px', height: '64px', backgroundColor: 'var(--bg-tertiary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <IconMapPin size={28} style={{ color: '#0ea5e9' }} />
                                 </div>
@@ -171,7 +196,7 @@ export const Contact = () => {
                     </div>
 
                     {/* Contact Form */}
-                    <div className="glass-panel" style={{ padding: '3rem' }}>
+                    <div className="glass-panel contact-form-panel" style={{ padding: '3rem' }}>
                         <form onSubmit={handleSubmit}>
                             <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                                 <label className="form-label">Full Name</label>

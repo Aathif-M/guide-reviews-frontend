@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
+import { IconInfoCircle } from '@tabler/icons-react';
 
 const SubmitApp = () => {
+    const { user } = useAuth();
     const { addToast } = useToast();
     const [formData, setFormData] = useState({
         title: '',
@@ -45,7 +48,12 @@ const SubmitApp = () => {
             if (logoFile) submitData.append('logo', logoFile);
 
             await axios.post('http://localhost:5000/api/v1/apps', submitData);
-            addToast('Application submitted successfully! Sent for admin approval.', 'success');
+
+            if (user?.role === 'ADMIN') {
+                addToast('Application added successfully!', 'success');
+            } else {
+                addToast('Application submitted successfully! Sent for admin approval.', 'success');
+            }
             setFormData({ title: '', description: '', categoryId: '', playstoreLink: '', appstoreLink: '' });
             setTutorials([]);
             setLogoFile(null);
@@ -65,6 +73,18 @@ const SubmitApp = () => {
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
                     Help map the digital world for older adults by submitting an app you find useful or want to be reviewed.
                 </p>
+
+                {user?.role !== 'ADMIN' && (
+                    <div style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderLeft: '4px solid var(--accent-blue)', padding: '1.5rem', borderRadius: '8px', marginBottom: '2.5rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                        <IconInfoCircle size={24} style={{ color: 'var(--accent-blue)', flexShrink: 0, marginTop: '2px' }} />
+                        <div>
+                            <h4 style={{ color: 'var(--text-primary)', fontWeight: 600, marginBottom: '0.5rem', fontSize: '1.1rem' }}>How submission works</h4>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.5 }}>
+                                To ensure the G.U.I.D.E. platform remains a safe, focused space for our community, all incoming app recommendations are routed to our administrative team. They will verify the app's heuristic value before formally publishing it to the platform.
+                            </p>
+                        </div>
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
@@ -126,7 +146,9 @@ const SubmitApp = () => {
                         </div>
                     </div>
 
-                    <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>Submit for Review</button>
+                    <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>
+                        {user?.role === 'ADMIN' ? 'Submit App' : 'Submit for Review'}
+                    </button>
                 </form>
             </div>
         </div>

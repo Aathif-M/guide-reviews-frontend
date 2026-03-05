@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
@@ -15,7 +15,13 @@ const Login = () => {
 
     const { login } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
     const containerRef = React.useRef(null);
+
+    // Scroll to top on mount
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     // Staggered entry animation
     useGSAP(() => {
@@ -40,12 +46,17 @@ const Login = () => {
 
         try {
             const data = await login(email, password);
-            // Determine where to send the user based on role
-            // In this setup Admins log in through here as well, we just route them.
-            if (data.user?.role === 'ADMIN') {
-                navigate('/admin');
+            addToast(`Welcome back, ${data.user?.firstName}!`, 'success');
+
+            const intendedDestination = location.state?.from?.pathname;
+
+            // Navigate to intended destination if available, otherwise default routing
+            if (intendedDestination) {
+                navigate(intendedDestination, { replace: true });
+            } else if (data.user?.role === 'ADMIN') {
+                navigate('/admin', { replace: true });
             } else {
-                navigate('/');
+                navigate('/', { replace: true });
             }
         } catch (err) {
             addToast(typeof err === 'string' ? err : 'Login failed. Please check your credentials.', 'error');

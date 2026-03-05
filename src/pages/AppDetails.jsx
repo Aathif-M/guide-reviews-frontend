@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
@@ -10,6 +10,7 @@ import { IconBrandGooglePlay, IconBrandApple, IconChevronDown, IconChevronUp, Ic
 const AppDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const { user } = useAuth();
     const { addToast } = useToast();
 
@@ -116,7 +117,6 @@ const AppDetails = () => {
 
     const handleReviewSubmit = async (e) => {
         e.preventDefault();
-        setMessage({ type: '', text: '' });
 
         // Ensure all category questions are answered
         const categoryQuestions = app.category?.questions || [];
@@ -588,7 +588,7 @@ const AppDetails = () => {
                             ) : !user && (
                                 <div style={{ padding: '1.5rem', background: 'var(--bg-tertiary)', borderRadius: '8px', marginBottom: '2rem', textAlign: 'center' }}>
                                     <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>Please log in to leave a review.</p>
-                                    <Link to="/login" className="btn btn-outline">Log In</Link>
+                                    <Link to="/login" state={{ from: location }} className="btn btn-outline">Log In</Link>
                                 </div>
                             )}
 
@@ -704,7 +704,7 @@ const AppDetails = () => {
                             ) : !user && (
                                 <div style={{ padding: '1.5rem', background: 'var(--bg-tertiary)', borderRadius: '8px', marginBottom: '2rem', textAlign: 'center' }}>
                                     <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>Please log in to ask a question.</p>
-                                    <Link to="/login" className="btn btn-outline">Log In</Link>
+                                    <Link to="/login" state={{ from: location }} className="btn btn-outline">Log In</Link>
                                 </div>
                             )}
 
