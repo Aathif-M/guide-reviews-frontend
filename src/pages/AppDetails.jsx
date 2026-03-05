@@ -39,6 +39,12 @@ const AppDetails = () => {
     const [reviewSortOrder, setReviewSortOrder] = useState('newest'); // 'newest', 'oldest', 'highest', 'lowest'
     const [reviewFilterRating, setReviewFilterRating] = useState('all'); // 'all', '5', '4', etc.
 
+    const getScoreColor = (score) => {
+        if (score >= 7) return 'var(--success)';
+        if (score >= 4) return 'var(--warning)';
+        return 'var(--danger)';
+    };
+
     const displayReviews = React.useMemo(() => {
         if (!app?.reviews) return [];
         let filtered = [...app.reviews];
@@ -481,7 +487,7 @@ const AppDetails = () => {
                                                         {existingUserReview.questionAnswers.map((qa, i) => (
                                                             <li key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', borderBottom: i !== existingUserReview.questionAnswers.length - 1 ? '1px dashed var(--border-color)' : 'none', paddingBottom: i !== existingUserReview.questionAnswers.length - 1 ? '0.5rem' : '0' }}>
                                                                 <span>{qa.question?.question || 'Evaluation Metric'}</span>
-                                                                <span style={{ color: 'var(--warning)', fontWeight: 600, flexShrink: 0 }}>{qa.answerRating} / 10</span>
+                                                                <span style={{ color: getScoreColor(qa.answerRating), fontWeight: 600, flexShrink: 0 }}>{qa.answerRating} / 10</span>
                                                             </li>
                                                         ))}
                                                     </ul>
@@ -661,7 +667,7 @@ const AppDetails = () => {
                                                         {review.questionAnswers.map((qa, i) => (
                                                             <li key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', borderBottom: i !== review.questionAnswers.length - 1 ? '1px dashed var(--border-color)' : 'none', paddingBottom: i !== review.questionAnswers.length - 1 ? '0.5rem' : '0' }}>
                                                                 <span>{qa.question?.question || 'Evaluation Metric'}</span>
-                                                                <span style={{ color: 'var(--warning)', fontWeight: 600, flexShrink: 0 }}>{qa.answerRating} / 10</span>
+                                                                <span style={{ color: getScoreColor(qa.answerRating), fontWeight: 600, flexShrink: 0 }}>{qa.answerRating} / 10</span>
                                                             </li>
                                                         ))}
                                                     </ul>
