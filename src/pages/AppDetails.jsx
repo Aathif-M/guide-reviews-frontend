@@ -748,29 +748,34 @@ const AppDetails = () => {
                                                             {/* Voting Sidebar */}
                                                             {(() => {
                                                                 const myVote = user && answer.votes ? answer.votes.find(v => v.userId === user.id)?.voteType : undefined;
-                                                                const netScore = (answer.upvotes || 0) - (answer.downvotes || 0);
+                                                                const upvoteCount = answer.upvotes || 0;
+                                                                const downvoteCount = answer.downvotes || 0;
                                                                 return (
-                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.1rem' }}>
+                                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', minWidth: '48px' }}>
+                                                                        {/* Upvote */}
                                                                         <button
                                                                             onClick={() => handleVoteAnswer(post.id, answer.id, 1)}
-                                                                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: myVote === 1 ? 'var(--success)' : 'var(--text-muted)', transition: 'color 0.15s' }}
+                                                                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: myVote === 1 ? 'var(--success)' : 'var(--text-muted)', transition: 'color 0.15s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.1rem' }}
                                                                             onMouseOver={(e) => { if (myVote !== 1) e.currentTarget.style.color = 'var(--success)'; }}
                                                                             onMouseOut={(e) => { if (myVote !== 1) e.currentTarget.style.color = 'var(--text-muted)'; }}
                                                                             title={myVote === 1 ? 'Remove Upvote' : 'Upvote'}
                                                                         >
-                                                                            <IconArrowBigUp size={24} fill={myVote === 1 ? 'currentColor' : 'none'} />
+                                                                            <IconArrowBigUp size={22} fill={myVote === 1 ? 'currentColor' : 'none'} />
+                                                                            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: upvoteCount > 0 ? 'var(--success)' : 'var(--text-muted)' }}>{upvoteCount}</span>
                                                                         </button>
-                                                                        <span style={{ fontWeight: 700, fontSize: '1.2rem', color: netScore > 0 ? 'var(--success)' : (netScore < 0 ? 'var(--danger)' : 'var(--text-primary)') }}>
-                                                                            {netScore}
-                                                                        </span>
+
+                                                                        <div style={{ width: '1px', height: '12px', background: 'var(--border-color)' }} />
+
+                                                                        {/* Downvote */}
                                                                         <button
                                                                             onClick={() => handleVoteAnswer(post.id, answer.id, -1)}
-                                                                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: myVote === -1 ? 'var(--danger)' : 'var(--text-muted)', transition: 'color 0.15s' }}
+                                                                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: myVote === -1 ? 'var(--danger)' : 'var(--text-muted)', transition: 'color 0.15s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.1rem' }}
                                                                             onMouseOver={(e) => { if (myVote !== -1) e.currentTarget.style.color = 'var(--danger)'; }}
                                                                             onMouseOut={(e) => { if (myVote !== -1) e.currentTarget.style.color = 'var(--text-muted)'; }}
                                                                             title={myVote === -1 ? 'Remove Downvote' : 'Downvote'}
                                                                         >
-                                                                            <IconArrowBigDown size={24} fill={myVote === -1 ? 'currentColor' : 'none'} />
+                                                                            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: downvoteCount > 0 ? 'var(--danger)' : 'var(--text-muted)' }}>{downvoteCount}</span>
+                                                                            <IconArrowBigDown size={22} fill={myVote === -1 ? 'currentColor' : 'none'} />
                                                                         </button>
                                                                     </div>
                                                                 );
