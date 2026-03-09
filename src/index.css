@@ -407,10 +407,11 @@ select.form-control option {
   max-width: 800px;
   margin: 0 auto;
   display: flex;
-  background-color: white;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 32px;
   padding: 0.5rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
 .app-details-header {

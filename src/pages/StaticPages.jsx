@@ -35,7 +35,7 @@ export const About = () => {
     return (
         <div ref={containerRef} style={{ backgroundColor: 'var(--bg-main)', minHeight: '100vh', paddingBottom: '4rem' }}>
             {/* Header Section */}
-            <section className="about-header" style={{ backgroundColor: '#1c1c1c', color: 'white', padding: '5rem 1.5rem', textAlign: 'center' }}>
+            <section className="about-header" style={{ background: 'linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary))', borderBottom: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '5rem 1.5rem', textAlign: 'center' }}>
                 <div className="container">
                     <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1rem' }}>
                         About <span className="text-gradient">G.U.I.D.E.</span>
@@ -72,7 +72,7 @@ export const About = () => {
 
                         <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
                             <div style={{ backgroundColor: 'rgba(139,92,246,0.1)', padding: '1rem', borderRadius: '12px' }}>
-                                <IconHeartHandshake size={32} style={{ color: '#8b5cf6' }} />
+                                <IconHeartHandshake size={32} style={{ color: 'var(--accent-purple)' }} />
                             </div>
                             <div>
                                 <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Community Driven</h3>
@@ -145,7 +145,7 @@ export const Contact = () => {
     return (
         <div ref={containerRef} style={{ backgroundColor: 'var(--bg-main)', minHeight: '100vh', paddingBottom: '4rem' }}>
             {/* Header Section */}
-            <section className="contact-header" style={{ backgroundColor: '#1c1c1c', color: 'white', padding: '5rem 1.5rem', textAlign: 'center', marginBottom: '4rem' }}>
+            <section className="contact-header" style={{ background: 'linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary))', borderBottom: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '5rem 1.5rem', textAlign: 'center', marginBottom: '4rem' }}>
                 <div className="container">
                     <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1rem' }}>
                         Get in <span className="text-gradient">Touch</span>

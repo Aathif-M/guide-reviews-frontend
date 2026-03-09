@@ -114,8 +114,8 @@ const Home = () => {
         <div style={{ backgroundColor: 'var(--bg-main)', minHeight: '100vh', paddingBottom: '4rem' }}>
             {/* HERO SECTION */}
             <section ref={headerRef} className="hero-section" style={{
-                backgroundColor: '#1c1c1c',
-                color: 'white'
+                background: 'linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary))',
+                borderBottom: '1px solid var(--border-color)'
             }}>
                 <div className="container" style={{ position: 'relative', zIndex: 2 }}>
                     <h1 className="hero-title">
@@ -128,7 +128,7 @@ const Home = () => {
 
                     {/* Big Hero Search Bar */}
                     <div className="search-bar-wrap">
-                        <div style={{ padding: '0 1rem', display: 'flex', alignItems: 'center', color: '#666' }}>
+                        <div style={{ padding: '0 1rem', display: 'flex', alignItems: 'center', color: 'var(--text-muted)' }}>
                             <IconSearch size={24} />
                         </div>
                         <input
@@ -140,7 +140,7 @@ const Home = () => {
                                 outline: 'none',
                                 fontSize: '1.2rem',
                                 padding: '1rem',
-                                color: '#1c1c1c',
+                                color: 'var(--text-primary)',
                                 borderRadius: '32px'
                             }}
                             value={searchQuery}
@@ -322,7 +322,7 @@ const Home = () => {
                                     onClick={() => navigate(`/apps/${review.appId}`)}
                                 >
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#0ea5e9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700 }}>
+                                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--accent-cyan)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700 }}>
                                             {review.user?.firstName?.charAt(0) || 'U'}
                                         </div>
                                         <div>

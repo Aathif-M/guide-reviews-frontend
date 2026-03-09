@@ -927,7 +927,7 @@ const AdminDashboard = () => {
                                         .map(cat => {
                                             const CategoryIcon = cat.iconName ? TablerIcons[cat.iconName] : null;
                                             return (
-                                                <div key={cat.id} className="glass-card" style={{ padding: '1.5rem', borderLeft: '4px solid var(--accent-blue)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflow: 'hidden' }}>
+                                                <div key={cat.id} className="glass-card" style={{ padding: '1.5rem', borderLeft: '4px solid var(--accent-blue)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                                                     <div>
                                                         <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                                             {CategoryIcon && <CategoryIcon size={24} style={{ color: 'var(--accent-blue)' }} />}
