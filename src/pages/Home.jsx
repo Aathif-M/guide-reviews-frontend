@@ -113,34 +113,21 @@ const Home = () => {
     return (
         <div style={{ backgroundColor: 'var(--bg-main)', minHeight: '100vh', paddingBottom: '4rem' }}>
             {/* HERO SECTION */}
-            <section ref={headerRef} style={{
+            <section ref={headerRef} className="hero-section" style={{
                 backgroundColor: '#1c1c1c',
-                color: 'white',
-                padding: '5rem 1.5rem',
-                textAlign: 'center',
-                position: 'relative',
-                overflow: 'visible',
-                zIndex: 10
+                color: 'white'
             }}>
                 <div className="container" style={{ position: 'relative', zIndex: 2 }}>
-                    <h1 style={{ fontSize: '3.5rem', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.02em', lineHeight: '1.2' }}>
+                    <h1 className="hero-title">
                         Discover accessible apps. <br />
                         <span className="text-gradient">Find tools you can rely on.</span>
                     </h1>
-                    <p style={{ fontSize: '1.25rem', opacity: 0.9, maxWidth: '600px', margin: '0 auto 3rem auto' }}>
+                    <p className="text-body" style={{ margin: '0 auto 3rem auto' }}>
                         G.U.I.D.E. is the premier platform for discovering and reviewing elderly-friendly mobile applications.
                     </p>
 
                     {/* Big Hero Search Bar */}
-                    <div style={{
-                        maxWidth: '800px',
-                        margin: '0 auto',
-                        display: 'flex',
-                        backgroundColor: 'white',
-                        borderRadius: '32px',
-                        padding: '0.5rem',
-                        boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
-                    }}>
+                    <div className="search-bar-wrap">
                         <div style={{ padding: '0 1rem', display: 'flex', alignItems: 'center', color: '#666' }}>
                             <IconSearch size={24} />
                         </div>

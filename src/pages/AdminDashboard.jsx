@@ -309,11 +309,11 @@ const AdminDashboard = () => {
     };
 
     return (
-        <div className="container" style={{ padding: '2rem 1.5rem', display: 'flex', gap: '2rem', minHeight: '80vh' }}>
+        <div className="container admin-layout">
 
             {/* Sidebar Navigation */}
-            <aside className="glass-card" style={{ width: '250px', minWidth: '250px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', height: 'fit-content', flexShrink: 0 }}>
-                <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', padding: '0.5rem' }} className="text-gradient">Admin Center</h2>
+            <aside className="glass-card admin-sidebar">
+                <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', padding: '0.5rem' }} className="text-gradient admin-sidebar-title">Admin Center</h2>
                 <button
                     className={`btn ${activeTab === 'apps' ? 'btn-primary' : 'btn-outline'}`}
                     onClick={() => { setActiveTab('apps'); }}
@@ -359,7 +359,7 @@ const AdminDashboard = () => {
             </aside>
 
             {/* Main Content Area */}
-            <section className="glass-panel" style={{ flexGrow: 1, padding: '2rem' }}>
+            <section className="glass-panel admin-main-content">
 
                 {/* Floating toast notifications used globally */}
 

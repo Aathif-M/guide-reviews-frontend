@@ -24,6 +24,7 @@ const AppContent = () => {
   const { addToast } = useToast();
   const location = useLocation();
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -41,7 +42,7 @@ const AppContent = () => {
           Admin Mode Active
         </div>
       )}
-      <header className={`glass-panel flex-between ${user?.role === 'ADMIN' ? 'admin-header' : ''}`} style={{ padding: '1rem 2rem', margin: '1rem', position: 'sticky', top: '1rem', zIndex: 100, borderTop: user?.role === 'ADMIN' ? '2px solid var(--accent-blue)' : undefined }}>
+      <header className={`glass-panel app-header ${user?.role === 'ADMIN' ? 'admin-header' : ''}`} style={{ borderTop: user?.role === 'ADMIN' ? '2px solid var(--accent-blue)' : undefined }}>
         <div className="logo" style={{ display: 'flex', alignItems: 'center' }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', gap: '0.5rem' }}>
             <img
@@ -52,8 +53,19 @@ const AppContent = () => {
             {/* <span className="text-gradient" style={{ fontSize: '1.5rem', fontWeight: 700 }}>G.U.I.D.E.</span> */}
           </Link>
         </div>
-        <nav>
-          <ul className="flex-center" style={{ gap: '2rem', listStyle: 'none' }}>
+
+        <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            {isMobileMenuOpen ? (
+              <><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></>
+            ) : (
+              <><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></>
+            )}
+          </svg>
+        </button>
+
+        <nav className={`nav-menu ${isMobileMenuOpen ? 'open' : ''}`}>
+          <ul className="nav-list" onClick={() => setIsMobileMenuOpen(false)}>
             <li><NavLink to="/" style={({ isActive }) => ({ color: isActive ? 'var(--accent-blue)' : 'var(--text-primary)', textDecoration: 'none', fontWeight: isActive ? 600 : 400, textShadow: isActive ? '0 0 12px rgba(59, 130, 246, 0.5)' : 'none' })}>Home</NavLink></li>
             <li><NavLink to="/about" style={({ isActive }) => ({ color: isActive ? 'var(--accent-blue)' : 'var(--text-primary)', textDecoration: 'none', fontWeight: isActive ? 600 : 400, textShadow: isActive ? '0 0 12px rgba(59, 130, 246, 0.5)' : 'none' })}>About Us</NavLink></li>
             <li><NavLink to="/contact" style={({ isActive }) => ({ color: isActive ? 'var(--accent-blue)' : 'var(--text-primary)', textDecoration: 'none', fontWeight: isActive ? 600 : 400, textShadow: isActive ? '0 0 12px rgba(59, 130, 246, 0.5)' : 'none' })}>Contact Us</NavLink></li>

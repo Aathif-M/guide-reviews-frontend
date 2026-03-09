@@ -322,7 +322,7 @@ const AppDetails = () => {
             </button>
 
             <div className="glass-panel" style={{ padding: '3rem', marginBottom: '2rem' }}>
-                <div className="app-header-anim" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <div className="app-header-anim app-details-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                         {app.logoUrl && (
                             <img src={app.logoUrl?.startsWith('/uploads') ? `http://localhost:5000${app.logoUrl}` : app.logoUrl} alt={`${app.title} logo`} style={{ width: '80px', height: '80px', borderRadius: '16px', objectFit: 'cover' }} />
@@ -432,15 +432,17 @@ const AppDetails = () => {
 
             {/* Interactive Section: Reviews & Forums */}
             <div className="glass-panel app-tabs-anim" style={{ padding: '0' }}>
-                <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)' }}>
+                <div className="tabs-container">
                     <button
-                        style={{ flex: 1, padding: '1.5rem', background: activeTab === 'reviews' ? 'rgba(59, 130, 246, 0.05)' : 'transparent', border: 'none', borderBottom: activeTab === 'reviews' ? '2px solid var(--accent-blue)' : '2px solid transparent', fontSize: '1.2rem', fontWeight: 600, color: activeTab === 'reviews' ? 'var(--accent-blue)' : 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' }}
+                        className="tab-button"
+                        style={{ background: activeTab === 'reviews' ? 'rgba(59, 130, 246, 0.05)' : 'transparent', borderBottomColor: activeTab === 'reviews' ? 'var(--accent-blue)' : 'transparent', color: activeTab === 'reviews' ? 'var(--accent-blue)' : 'var(--text-secondary)' }}
                         onClick={() => { setActiveTab('reviews'); }}
                     >
                         Community Reviews ({app.reviews?.length || 0})
                     </button>
                     <button
-                        style={{ flex: 1, padding: '1.5rem', background: activeTab === 'forum' ? 'rgba(139, 92, 246, 0.05)' : 'transparent', border: 'none', borderBottom: activeTab === 'forum' ? '2px solid var(--accent-purple)' : '2px solid transparent', fontSize: '1.2rem', fontWeight: 600, color: activeTab === 'forum' ? 'var(--accent-purple)' : 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' }}
+                        className="tab-button"
+                        style={{ background: activeTab === 'forum' ? 'rgba(139, 92, 246, 0.05)' : 'transparent', borderBottomColor: activeTab === 'forum' ? 'var(--accent-purple)' : 'transparent', color: activeTab === 'forum' ? 'var(--accent-purple)' : 'var(--text-secondary)' }}
                         onClick={() => { setActiveTab('forum'); }}
                     >
                         Q&A Forum ({forums.length})
@@ -506,7 +508,7 @@ const AppDetails = () => {
                                             {editingReviewId ? 'Edit Your Review' : 'Leave a Review'}
                                         </h4>
 
-                                        <div style={{ display: 'grid', gridTemplateColumns: app.category?.questions?.length > 0 ? '1fr 1fr' : '1fr', gap: '3rem', marginBottom: '1.5rem' }}>
+                                        <div className={`review-form-grid ${app.category?.questions?.length > 0 ? '' : 'single-column'}`}>
                                             {/* Left Column: General Rating and Experience */}
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                                 <div className="form-group" style={{ marginBottom: 0 }}>
