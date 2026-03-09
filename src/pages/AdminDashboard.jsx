@@ -731,7 +731,7 @@ const AdminDashboard = () => {
                                     </div>
                                 </div>
 
-                                <dialog id="userActivityModal" className="glass-panel" style={{ padding: '2.5rem', border: '1px solid var(--border-color)', borderRadius: '16px', minWidth: '600px', maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', margin: 'auto', position: 'fixed', top: '0', left: '0', right: '0', bottom: '0', color: 'var(--text-primary)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+                                <dialog id="userActivityModal" className="glass-panel" style={{ padding: '2.5rem', border: '1px solid var(--border-color)', borderRadius: '16px', minWidth: '600px', maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', margin: 'auto', position: 'fixed', top: '0', left: '0', right: '0', bottom: '0', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                                         <h3 style={{ fontSize: '1.75rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                             <TablerIcons.IconActivity style={{ color: 'var(--accent-blue)' }} size={28} />
@@ -888,7 +888,7 @@ const AdminDashboard = () => {
                                     </div>
                                 </div>
 
-                                <dialog id="categoryFormModal" className="glass-panel" style={{ padding: '2rem', border: 'none', borderRadius: '12px', minWidth: '400px', maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', margin: 'auto', position: 'fixed', top: '0', left: '0', right: '0', bottom: '0' }}>
+                                <dialog id="categoryFormModal" className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--border-color)', borderRadius: '12px', minWidth: '400px', maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', margin: 'auto', position: 'fixed', top: '0', left: '0', right: '0', bottom: '0' }}>
                                     <h3 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>{editingCategory ? 'Edit Category' : 'New Category'}</h3>
                                     <form onSubmit={(e) => { handleCategorySave(e); document.getElementById('categoryFormModal').close(); }}>
                                         <div className="form-group">

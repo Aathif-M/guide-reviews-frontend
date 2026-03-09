@@ -80,6 +80,12 @@ button {
   border: 1px solid var(--glass-border);
   border-radius: 16px;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  color: var(--text-primary);
+}
+
+dialog {
+  color: inherit;
+  font-family: inherit;
 }
 
 .glass-card {
