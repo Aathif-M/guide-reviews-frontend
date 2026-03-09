@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -12,8 +12,37 @@ import IconPicker from '../components/IconPicker';
  */
 const ActionMenu = ({ children }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const menuRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') {
+                setIsOpen(false);
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener('keydown', handleKeyDown);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isOpen]);
+
     return (
-        <div style={{ position: 'relative', display: 'inline-block' }}>
+        <div ref={menuRef} style={{ position: 'relative', display: 'inline-block' }}>
             <button
                 className="btn btn-outline"
                 style={{ padding: '0.4rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -23,31 +52,25 @@ const ActionMenu = ({ children }) => {
                 <TablerIcons.IconDotsVertical size={18} />
             </button>
             {isOpen && (
-                <>
-                    <div
-                        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 90 }}
-                        onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
-                    />
-                    <div
-                        className="glass-panel"
-                        style={{
-                            position: 'absolute',
-                            right: 0,
-                            top: 'calc(100% + 5px)',
-                            zIndex: 100,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            padding: '0.5rem',
-                            gap: '0.5rem',
-                            minWidth: '120px',
-                            background: 'var(--bg-secondary)',
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
-                        }}
-                        onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
-                    >
-                        {children}
-                    </div>
-                </>
+                <div
+                    className="glass-panel"
+                    style={{
+                        position: 'absolute',
+                        right: 0,
+                        top: 'calc(100% + 5px)',
+                        zIndex: 100,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        padding: '0.5rem',
+                        gap: '0.5rem',
+                        minWidth: '120px',
+                        background: 'var(--bg-secondary)',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+                    }}
+                    onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
+                >
+                    {children}
+                </div>
             )}
         </div>
     );
@@ -940,8 +963,8 @@ const AdminDashboard = () => {
                                                     </div>
                                                     <div style={{ textAlign: 'right' }}>
                                                         <ActionMenu>
-                                                            <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.4rem 0.8rem', fontSize: '0.8rem', border: 'none' }} onClick={() => { setEditingCategory(cat); setCategoryForm({ name: cat.name, description: cat.description || '', iconName: cat.iconName || '', questions: cat.questions || [] }); setDeletedQuestions([]); document.getElementById('categoryFormModal').showModal(); }}>Edit Category</button>
-                                                            <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.4rem 0.8rem', fontSize: '0.8rem', color: 'var(--danger)', border: 'none' }} onClick={() => handleCategoryDelete(cat.id)}>Delete</button>
+                                                            <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.4rem 0.4rem', fontSize: '0.8rem', border: 'none' }} onClick={() => { setEditingCategory(cat); setCategoryForm({ name: cat.name, description: cat.description || '', iconName: cat.iconName || '', questions: cat.questions || [] }); setDeletedQuestions([]); document.getElementById('categoryFormModal').showModal(); }}>Edit Category</button>
+                                                            <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.4rem 0.4  rem', fontSize: '0.8rem', color: 'var(--danger)', border: 'none' }} onClick={() => handleCategoryDelete(cat.id)}>Delete</button>
                                                         </ActionMenu>
                                                     </div>
                                                 </div>

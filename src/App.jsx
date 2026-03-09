@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, NavLink, useLocation } from 'react-router-dom';
 import { IconSun, IconMoon } from '@tabler/icons-react';
 
@@ -25,11 +25,30 @@ const AppContent = () => {
   const location = useLocation();
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const headerRef = useRef(null);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (headerRef.current && !headerRef.current.contains(event.target)) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMobileMenuOpen]);
 
   const toggleTheme = () => {
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
@@ -42,7 +61,7 @@ const AppContent = () => {
           Admin Mode Active
         </div>
       )}
-      <header className={`glass-panel app-header ${user?.role === 'ADMIN' ? 'admin-header' : ''}`} style={{ borderTop: user?.role === 'ADMIN' ? '2px solid var(--accent-blue)' : undefined }}>
+      <header ref={headerRef} className={`glass-panel app-header ${user?.role === 'ADMIN' ? 'admin-header' : ''}`} style={{ borderTop: user?.role === 'ADMIN' ? '2px solid var(--accent-blue)' : undefined }}>
         <div className="logo" style={{ display: 'flex', alignItems: 'center' }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', gap: '0.5rem' }}>
             <img

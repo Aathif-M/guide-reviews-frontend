@@ -19,6 +19,7 @@ const Home = () => {
     const categoryRef = useRef(null);
     const recentReviewsRef = useRef(null);
     const cardsRef = useRef([]);
+    const searchContainerRef = useRef(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -38,6 +39,33 @@ const Home = () => {
         };
         fetchHomeData();
     }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+                setIsSearchFocused(false);
+            }
+        };
+
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') {
+                setIsSearchFocused(false);
+            }
+        };
+
+        if (isSearchFocused) {
+            document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener('keydown', handleKeyDown);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isSearchFocused]);
 
     useEffect(() => {
         if (!loading) {
@@ -127,7 +155,7 @@ const Home = () => {
                     </p>
 
                     {/* Big Hero Search Bar */}
-                    <div className="search-bar-wrap">
+                    <div className="search-bar-wrap" ref={searchContainerRef}>
                         <div style={{ padding: '0 1rem', display: 'flex', alignItems: 'center', color: 'var(--text-muted)' }}>
                             <IconSearch size={24} />
                         </div>
