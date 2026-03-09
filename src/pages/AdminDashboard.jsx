@@ -8,6 +8,52 @@ import * as TablerIcons from '@tabler/icons-react';
 import IconPicker from '../components/IconPicker';
 
 /**
+ * ActionMenu Component (Dropdown for mobile-friendly table actions)
+ */
+const ActionMenu = ({ children }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    return (
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+            <button
+                className="btn btn-outline"
+                style={{ padding: '0.4rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
+                title="Actions"
+            >
+                <TablerIcons.IconDotsVertical size={18} />
+            </button>
+            {isOpen && (
+                <>
+                    <div
+                        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 90 }}
+                        onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
+                    />
+                    <div
+                        className="glass-panel"
+                        style={{
+                            position: 'absolute',
+                            right: 0,
+                            top: 'calc(100% + 5px)',
+                            zIndex: 100,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            padding: '0.5rem',
+                            gap: '0.5rem',
+                            minWidth: '120px',
+                            background: 'var(--bg-secondary)',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+                        }}
+                        onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
+                    >
+                        {children}
+                    </div>
+                </>
+            )}
+        </div>
+    );
+};
+
+/**
  * AdminDashboard Component
  * 
  * Provides a comprehensive interface for administrators to manage
@@ -407,7 +453,7 @@ const AdminDashboard = () => {
                                             <th style={{ padding: '1rem 0' }}>App Name</th>
                                             <th>Category</th>
                                             <th>Status</th>
-                                            <th>Actions</th>
+                                            <th style={{ textAlign: 'right' }}>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -433,16 +479,18 @@ const AdminDashboard = () => {
                                                             {app.approvalStatus}
                                                         </span>
                                                     </td>
-                                                    <td style={{ display: 'flex', gap: '0.5rem', padding: '1rem 0' }}>
-                                                        <button className="btn btn-outline" style={{ padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} onClick={() => navigate(`/edit-app/${app.id}`)}>Edit</button>
+                                                    <td style={{ padding: '1rem 0', textAlign: 'right' }}>
+                                                        <ActionMenu>
+                                                            <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.4rem 0.8rem', fontSize: '0.85rem', border: 'none' }} onClick={() => navigate(`/edit-app/${app.id}`)}>Edit</button>
 
-                                                        {app.approvalStatus === 'PENDING' && (
-                                                            <>
-                                                                <button className="btn btn-primary" style={{ padding: '0.3rem 0.5rem', fontSize: '0.85rem' }} onClick={() => handleApproveReject('apps', app.id, 'APPROVED')}>Approve</button>
-                                                                <button className="btn btn-outline" style={{ padding: '0.3rem 0.5rem', fontSize: '0.85rem', color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => handleApproveReject('apps', app.id, 'REJECTED')}>Reject</button>
-                                                            </>
-                                                        )}
-                                                        <button className="btn btn-outline" style={{ padding: '0.3rem 0.5rem', fontSize: '0.85rem', color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => handleAppDelete(app.id)}>Delete</button>
+                                                            {app.approvalStatus === 'PENDING' && (
+                                                                <>
+                                                                    <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={() => handleApproveReject('apps', app.id, 'APPROVED')}>Approve</button>
+                                                                    <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.4rem 0.8rem', fontSize: '0.85rem', color: 'var(--danger)', border: 'none' }} onClick={() => handleApproveReject('apps', app.id, 'REJECTED')}>Reject</button>
+                                                                </>
+                                                            )}
+                                                            <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.4rem 0.8rem', fontSize: '0.85rem', color: 'var(--danger)', border: 'none' }} onClick={() => handleAppDelete(app.id)}>Delete</button>
+                                                        </ActionMenu>
                                                     </td>
                                                 </tr>
                                             ))}
@@ -501,9 +549,11 @@ const AdminDashboard = () => {
                                                     </span>
                                                 </div>
                                                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                                    <a href={t.videoUrl} target="_blank" rel="noreferrer" className="btn btn-outline" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem' }}>View Link</a>
-                                                    <button className="btn btn-primary" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem' }} onClick={() => handleApproveReject('tutorials', t.id, 'APPROVED')}>Approve</button>
-                                                    <button className="btn btn-outline" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem', color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => handleApproveReject('tutorials', t.id, 'REJECTED')}>Reject</button>
+                                                    <a href={t.videoUrl} target="_blank" rel="noreferrer" className="btn btn-outline" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>View Link</a>
+                                                    <ActionMenu>
+                                                        <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={() => handleApproveReject('tutorials', t.id, 'APPROVED')}>Approve</button>
+                                                        <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.4rem 0.8rem', fontSize: '0.85rem', color: 'var(--danger)', border: 'none' }} onClick={() => handleApproveReject('tutorials', t.id, 'REJECTED')}>Reject</button>
+                                                    </ActionMenu>
                                                 </div>
                                             </div>
                                         ))}
@@ -608,10 +658,10 @@ const AdminDashboard = () => {
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                     <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>By {rev.user?.firstName} {rev.user?.lastName}</span>
                                                     {rev.approvalStatus === 'PENDING' && (
-                                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                            <button className="btn btn-primary" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem' }} onClick={() => handleApproveReject('reviews', rev.id, 'APPROVED')}>Approve</button>
-                                                            <button className="btn btn-outline" style={{ padding: '0.3rem 0.8rem', fontSize: '0.85rem', color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => handleApproveReject('reviews', rev.id, 'REJECTED')}>Reject</button>
-                                                        </div>
+                                                        <ActionMenu>
+                                                            <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={() => handleApproveReject('reviews', rev.id, 'APPROVED')}>Approve</button>
+                                                            <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.4rem 0.8rem', fontSize: '0.85rem', color: 'var(--danger)', border: 'none' }} onClick={() => handleApproveReject('reviews', rev.id, 'REJECTED')}>Reject</button>
+                                                        </ActionMenu>
                                                     )}
                                                 </div>
                                             </div>
@@ -721,16 +771,18 @@ const AdminDashboard = () => {
                                                     </div>
                                                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                                         <span style={{ padding: '0.3rem 0.8rem', background: 'var(--bg-tertiary)', borderRadius: '4px', fontSize: '0.8rem' }}>{u.role}</span>
-                                                        <button className="btn btn-outline" style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem' }} onClick={() => handleViewActivity(u.id)}>View Activity</button>
-                                                        {u.role !== 'ADMIN' && (
-                                                            <button
-                                                                className="btn btn-outline"
-                                                                style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem', color: u.isSuspended ? 'var(--success)' : 'var(--danger)', borderColor: u.isSuspended ? 'var(--success)' : 'var(--danger)' }}
-                                                                onClick={() => handleSuspendUser(u.id, u.isSuspended)}
-                                                            >
-                                                                {u.isSuspended ? 'Unsuspend' : 'Suspend'}
-                                                            </button>
-                                                        )}
+                                                        <ActionMenu>
+                                                            <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.4rem 0.8rem', fontSize: '0.8rem', border: 'none' }} onClick={() => handleViewActivity(u.id)}>View Activity</button>
+                                                            {u.role !== 'ADMIN' && (
+                                                                <button
+                                                                    className="btn btn-outline"
+                                                                    style={{ width: '100%', justifyContent: 'flex-start', padding: '0.4rem 0.8rem', fontSize: '0.8rem', color: u.isSuspended ? 'var(--success)' : 'var(--danger)', border: 'none' }}
+                                                                    onClick={() => handleSuspendUser(u.id, u.isSuspended)}
+                                                                >
+                                                                    {u.isSuspended ? 'Unsuspend' : 'Suspend'}
+                                                                </button>
+                                                            )}
+                                                        </ActionMenu>
                                                     </div>
                                                 </div>
                                             );
@@ -842,9 +894,11 @@ const AdminDashboard = () => {
                                                             {cat.questions?.length || 0} heuristic question{cat.questions?.length === 1 ? '' : 's'} defined
                                                         </p>
                                                     </div>
-                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                        <button className="btn btn-outline" style={{ padding: '0.3rem 0.5rem', fontSize: '0.8rem' }} onClick={() => { setEditingCategory(cat); setCategoryForm({ name: cat.name, description: cat.description || '', iconName: cat.iconName || '', questions: cat.questions || [] }); setDeletedQuestions([]); document.getElementById('categoryFormModal').showModal(); }}>Edit Category</button>
-                                                        <button className="btn btn-outline" style={{ padding: '0.3rem 0.5rem', fontSize: '0.8rem', color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => handleCategoryDelete(cat.id)}>Delete</button>
+                                                    <div style={{ textAlign: 'right' }}>
+                                                        <ActionMenu>
+                                                            <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.4rem 0.8rem', fontSize: '0.8rem', border: 'none' }} onClick={() => { setEditingCategory(cat); setCategoryForm({ name: cat.name, description: cat.description || '', iconName: cat.iconName || '', questions: cat.questions || [] }); setDeletedQuestions([]); document.getElementById('categoryFormModal').showModal(); }}>Edit Category</button>
+                                                            <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'flex-start', padding: '0.4rem 0.8rem', fontSize: '0.8rem', color: 'var(--danger)', border: 'none' }} onClick={() => handleCategoryDelete(cat.id)}>Delete</button>
+                                                        </ActionMenu>
                                                     </div>
                                                 </div>
                                             );
