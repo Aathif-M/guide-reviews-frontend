@@ -708,32 +708,76 @@ const AdminDashboard = () => {
                                     </div>
                                 </div>
 
-                                <dialog id="userActivityModal" className="glass-panel" style={{ padding: '2rem', border: 'none', borderRadius: '12px', minWidth: '500px', maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', margin: 'auto', position: 'fixed', top: '0', left: '0', right: '0', bottom: '0' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h3 style={{ fontSize: '1.5rem', margin: 0 }}>User Activity</h3>
-                                        <button className="btn btn-outline" style={{ padding: '0.3rem 0.6rem' }} onClick={() => document.getElementById('userActivityModal').close()}>Close</button>
+                                <dialog id="userActivityModal" className="glass-panel" style={{ padding: '2.5rem', border: '1px solid var(--border-color)', borderRadius: '16px', minWidth: '600px', maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', margin: 'auto', position: 'fixed', top: '0', left: '0', right: '0', bottom: '0', color: 'var(--text-primary)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                        <h3 style={{ fontSize: '1.75rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                            <TablerIcons.IconActivity style={{ color: 'var(--accent-blue)' }} size={28} />
+                                            User Activity Overview
+                                        </h3>
+                                        <button className="btn btn-outline" style={{ padding: '0.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => document.getElementById('userActivityModal').close()} title="Close">
+                                            <TablerIcons.IconX size={20} />
+                                        </button>
                                     </div>
                                     {!userActivity ? (
-                                        <p>Loading activity...</p>
+                                        <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
+                                            <p style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <TablerIcons.IconLoader size={24} />
+                                                Loading activity data...
+                                            </p>
+                                        </div>
                                     ) : (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                            <p><strong>Name:</strong> {userActivity.firstName} {userActivity.lastName}</p>
-                                            <p><strong>Email:</strong> {userActivity.email}</p>
-                                            <hr style={{ borderColor: 'var(--border-color)', margin: '0.5rem 0' }} />
-                                            <div>
-                                                <h4>Apps Submitted ({userActivity.submittedApps?.length || 0})</h4>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                            {/* User Profile Summary Card */}
+                                            <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem', borderLeft: '4px solid var(--accent-blue)' }}>
+                                                <div style={{ padding: '1rem', background: 'var(--bg-tertiary)', borderRadius: '50%', color: 'var(--accent-blue)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <TablerIcons.IconUser size={40} />
+                                                </div>
+                                                <div>
+                                                    <h4 style={{ fontSize: '1.4rem', margin: '0 0 0.25rem 0', fontWeight: 700 }}>{userActivity.firstName} {userActivity.lastName}</h4>
+                                                    <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        <TablerIcons.IconMail size={16} />
+                                                        {userActivity.email}
+                                                    </p>
+                                                </div>
                                             </div>
+
+                                            {/* Statistics Grid */}
                                             <div>
-                                                <h4>Reviews Left ({userActivity.reviews?.length || 0})</h4>
-                                            </div>
-                                            <div>
-                                                <h4>Tutorials Submitted ({userActivity.submittedTutorials?.length || 0})</h4>
-                                            </div>
-                                            <div>
-                                                <h4>Forum Posts ({userActivity.forumPosts?.length || 0})</h4>
-                                            </div>
-                                            <div>
-                                                <h4>Forum Answers ({userActivity.forumAnswers?.length || 0})</h4>
+                                                <h4 style={{ fontSize: '1.1rem', margin: '0 0 1rem 0', color: 'var(--text-secondary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    <TablerIcons.IconChartPie size={20} />
+                                                    Engagement Metrics
+                                                </h4>
+                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '1rem' }}>
+                                                    <div className="glass-card" style={{ padding: '1.5rem 1rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s', cursor: 'default' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+                                                        <TablerIcons.IconApps size={28} style={{ color: 'var(--accent-blue)', marginBottom: '0.75rem' }} />
+                                                        <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.25rem', lineHeight: 1 }}>{userActivity.submittedApps?.length || 0}</div>
+                                                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Apps</div>
+                                                    </div>
+
+                                                    <div className="glass-card" style={{ padding: '1.5rem 1rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s', cursor: 'default' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+                                                        <TablerIcons.IconStar size={28} style={{ color: 'var(--success)', marginBottom: '0.75rem' }} />
+                                                        <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.25rem', lineHeight: 1 }}>{userActivity.reviews?.length || 0}</div>
+                                                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Reviews</div>
+                                                    </div>
+
+                                                    <div className="glass-card" style={{ padding: '1.5rem 1rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s', cursor: 'default' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+                                                        <TablerIcons.IconDeviceDesktopAnalytics size={28} style={{ color: 'var(--warning)', marginBottom: '0.75rem' }} />
+                                                        <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.25rem', lineHeight: 1 }}>{userActivity.submittedTutorials?.length || 0}</div>
+                                                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Tutorials</div>
+                                                    </div>
+
+                                                    <div className="glass-card" style={{ padding: '1.5rem 1rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s', cursor: 'default' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+                                                        <TablerIcons.IconMessageCircle size={28} style={{ color: '#ec4899', marginBottom: '0.75rem' }} />
+                                                        <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.25rem', lineHeight: 1 }}>{userActivity.forumPosts?.length || 0}</div>
+                                                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Questions</div>
+                                                    </div>
+
+                                                    <div className="glass-card" style={{ padding: '1.5rem 1rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s', cursor: 'default' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+                                                        <TablerIcons.IconMessage2 size={28} style={{ color: '#8b5cf6', marginBottom: '0.75rem' }} />
+                                                        <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.25rem', lineHeight: 1 }}>{userActivity.forumAnswers?.length || 0}</div>
+                                                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Answers</div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     )}
