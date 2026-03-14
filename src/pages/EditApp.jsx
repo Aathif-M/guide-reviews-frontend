@@ -54,8 +54,6 @@ const EditApp = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-        setMessage('');
 
         try {
             const data = new FormData();

@@ -179,6 +179,7 @@ const Home = () => {
                         <button
                             className="btn btn-primary"
                             style={{
+                                marginLeft: '1rem',
                                 padding: '0 2rem',
                                 fontSize: '1.1rem',
                                 fontWeight: 600,
